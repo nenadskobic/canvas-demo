@@ -1,0 +1,33 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.canvas {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    border: 1px solid #616161;
+}
+
+.row-group {
+    display: flex;
+    flex-flow: row wrap;
+    border: 1px solid #878787;
+}
+
+.frame {
+    text-align: center;
+    border: 1px dashed #abb3da;
+
+}
+
+img {
+    object-fit: cover;
+}
+
+.f7 > img {
+    max-width: 100%;
+}
+

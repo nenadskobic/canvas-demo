@@ -1,0 +1,52 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.canvas {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    width: 100%;
+    min-width: 600px;
+    border: 1px solid #616161;
+}
+
+.row-group {
+    display: flex;
+    flex-flow: row wrap;
+    border: 1px solid #878787;
+}
+
+.col-group {
+    display: flex;
+    flex-flow: column;
+    max-width: 100%;
+    border: 1px solid #878787;
+}
+
+.frame {
+    text-align: center;
+    border: 1px dashed #abb3da;
+    padding: 1em;
+
+}
+
+img {
+    object-fit: cover;
+}
+
+.center {
+    /*align-items: end;*/
+}
+
+/*
+.f6 {
+    padding: 2em 1em 2em 1em;
+}*/
+
+
+.f8 > img, .f7 > img {
+    max-width: 100%;
+}

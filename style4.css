@@ -1,0 +1,45 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.canvas {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    border: 1px solid #616161;
+}
+
+.row-group-nowrap {
+    display: flex;
+    flex-flow: row nowrap;
+    border: 1px solid #428754;
+}
+
+.row-group {
+    display: flex;
+    flex-flow: row wrap;
+    border: 1px solid #878787;
+}
+
+.col-group {
+    display: flex;
+    flex-flow: column;
+    max-width: 100%;
+}
+
+.frame {
+    text-align: center;
+    border: 1px dashed #abb3da;
+    padding: 0.5em;
+
+}
+
+img {
+    object-fit: cover;
+}
+
+.f7 > img {
+    max-width: 100%;
+}
