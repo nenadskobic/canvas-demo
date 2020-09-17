@@ -1,3 +1,3 @@
 # canvas-demo
 
-Various mockups for canvas layout
+Various canvas mockups
