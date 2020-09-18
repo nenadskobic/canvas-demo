@@ -56,7 +56,8 @@ Ext.onReady(function () {
                         }]
                 })
             }, {
-                title: 'Second Tab'
+                title: 'Second Tab',
+                disabled: true
             }
 
         ]
