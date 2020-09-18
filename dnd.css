@@ -1,0 +1,66 @@
+* {
+    box-sizing: border-box;
+}
+
+.dd-target-over {
+    background: rgba(56, 147, 212, 0.85);
+}
+
+.dd-target {
+    background: green;
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+}
+
+.row-group {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.col-group {
+    display: flex;
+    flex-flow: column;
+}
+
+.col-group, .row-group {
+    border: 1px dotted black;
+    padding: 16px;
+    flex-basis: 100%;
+    gap: 16px;
+}
+
+.col-group:hover {
+    /*background: #b1b1b1;*/
+}
+
+.row-group:hover {
+    /*background: #5c8ab1;*/
+}
+
+.frame {
+    flex-basis: 100%;
+    padding: 16px;
+    border: 1px dotted black;
+}
+
+.frame > div:hover {
+    /*background: #47b171;*/
+}
+
+
+.frame > div {
+    cursor: pointer;
+    /*border: 1px dotted black;*/
+    min-width: 80px;
+    min-height: 40px;
+
+    /* Prevent text selection on all supported browsers*/
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+}

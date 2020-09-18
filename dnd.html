@@ -1,0 +1,80 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/theme-crisp/resources/theme-crisp-all.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/ext-all.js"> </script>
+    <link rel="stylesheet" media="screen" href="dnd.css">
+    <script type="application/javascript" src="dnd.js"></script>
+    </head>
+<body>
+
+<!-- Drag and drop target (can float over any canvas element) -->
+<div class="dd-target"></div>
+
+
+<div class="barsContainer">
+    <div id="ribbonSimple"></div>
+</div>
+<div class="cell-formula">Formule celija</div>
+<hr/>
+
+<!-- Canvas parent -->
+
+<div class="canvas-parent" style="padding:15px;">
+
+
+<!-- Flexbox groups-->
+
+    <div class="col-group">
+        <div class="row-group">
+            <div class="row-group">
+                <div class="frame" draggable="true">
+                    <div class="frame-content">Frame 1</div>
+                </div>
+                <div class="frame" draggable="true">
+                    <div class="frame-content">Frame 2</div>
+                </div>
+            </div>
+            <div class="row-group">
+                <div class="frame" draggable="true">
+                    <div class="frame-content">Frame 3</div>
+                </div>
+                <div class="frame" draggable="true">
+                    <div class="frame-content">Frame 4</div>
+                </div>
+                <div class="frame" draggable="true">
+                    <div class="frame-content">Frame 5</div>
+                </div>
+            </div>
+        </div>
+        <div class="row-group">
+            <div class="col-group">
+                <div class="frame" draggable="true">
+                    <div class="frame-content">Frame 5.1</div>
+                </div>
+                <div class="row-group">
+                    <div class="frame" draggable="true">
+                        <div class="frame-content">Frame 6</div>
+                    </div>
+                    <div class="frame" draggable="true">
+                        <div class="frame-content">Frame 7</div>
+                    </div>
+                </div>
+            </div>
+            <div class="frame" draggable="true">
+                <div class="frame-content">Frame 8</div>
+            </div>
+        </div>
+        <div class="row-group">
+            <div class="frame" draggable="true">
+                <div class="frame-content">Frame 9</div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of canvas parent-->
+
+
+</body>
+</html>
