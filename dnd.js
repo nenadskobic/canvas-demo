@@ -65,13 +65,7 @@ Ext.onReady(function () {
     });
 
     let btnContainer = tPanel.down('[text=Report]').container;
-
-
     btnContainer.set({ draggable: 'true' });
-
-    console.log(tPanel.down('[text=Report]').container);
-
-    console.log(document.querySelectorAll('td')[0]);
 
 
     let ddTarget = document.querySelectorAll('.dd-target')[0];
@@ -86,10 +80,8 @@ Ext.onReady(function () {
     }
 
     function handleDragEnter(e) {
-        this.classList.add('dd-target-over');
     }
     function handleDragLeave(e) {
-        this.classList.remove('dd-target-over');
     }
 
     function handleDrop(e) {
@@ -101,18 +93,25 @@ Ext.onReady(function () {
         // move dragged elem to the selected drop target
         if (e.target.classList.contains("dd-target")) {
             alert('successfull drop to '+ e.target.className);
-            e.target.classList.remove('dd-target-over');
+        } else {
+            ddTarget.style.top = 0;
+            ddTarget.style.left = 0;
+            ddTarget.style.width = 0;
+            ddTarget.style.height = 0;
         }
     }
 
     function dragStart(e) {
     }
 
+    function drag(e) {
+    }
+
     function dragEnd(e) {
-        ddTarget.classList.remove('dd-target-over');
     }
 
     btnContainer.dom.addEventListener('dragstart', dragStart);
+    btnContainer.dom.addEventListener('drag', drag);
     btnContainer.dom.addEventListener('dragend', dragEnd);
 
     ddTarget.addEventListener('dragover', handleDragOver);
@@ -180,13 +179,16 @@ Ext.onReady(function () {
             node.classList.contains('col-group');
     };
 
-    let canvasParentOnMouseMove = function(e) {
+    let canvasParentOnDragOver = function(e) {
 
         const target = e.target;
         let gapDDRectangle;
 
-
         if (!nodeContainsValidGroupCls(target)) {
+            ddTarget.style.top = 0;
+            ddTarget.style.left = 0;
+            ddTarget.style.width = 0;
+            ddTarget.style.height = 0;
             return;
         }
 
@@ -220,28 +222,28 @@ Ext.onReady(function () {
 
         // Mouse over left inner zone
         if (e.clientX <= rect.left + DD_TARGET_WIDTH) {
-            ddTarget.style.top = rect.top;
+            ddTarget.style.top = rect.top + e.view.scrollY;
             ddTarget.style.left = rect.left;
             ddTarget.style.width = DD_TARGET_WIDTH;
             ddTarget.style.height = rect.bottom - rect.top;
         }
         // Mouse over right inner zone
         else if (e.clientX >= rect.right - DD_TARGET_WIDTH) {
-            ddTarget.style.top = rect.top;
+            ddTarget.style.top = rect.top + e.view.scrollY;
             ddTarget.style.left = rect.right - DD_TARGET_WIDTH;
             ddTarget.style.width = DD_TARGET_WIDTH;
             ddTarget.style.height = rect.bottom - rect.top;
         }
         // Mouse over top inner zone
         else if (e.clientY <= rect.top + DD_TARGET_HEIGHT ) {
-            ddTarget.style.top = rect.top;
+            ddTarget.style.top = rect.top + e.view.scrollY;
             ddTarget.style.left = rect.left;
             ddTarget.style.width = rect.right - rect.left;
             ddTarget.style.height = DD_TARGET_HEIGHT;
         }
         // Mouse over bottom inner zone
         else if (e.clientY >= rect.bottom - DD_TARGET_HEIGHT) {
-            ddTarget.style.top = rect.bottom - DD_TARGET_HEIGHT;
+            ddTarget.style.top = rect.bottom - DD_TARGET_HEIGHT + e.view.scrollY;
             ddTarget.style.left = rect.left;
             ddTarget.style.width = rect.right - rect.left;
             ddTarget.style.height = DD_TARGET_HEIGHT;
@@ -250,7 +252,7 @@ Ext.onReady(function () {
         else if(isRowGroupWithFrameSiblings) {
             gapDDRectangle = mouseIsBetweenFrameChilds(target,childGapXs, e.clientX);
             if (gapDDRectangle) {
-                ddTarget.style.top = gapDDRectangle.top;
+                ddTarget.style.top = gapDDRectangle.top + e.view.scrollY;
                 ddTarget.style.left = gapDDRectangle.left;
                 ddTarget.style.width = DD_TARGET_WIDTH;
                 ddTarget.style.height = rect.bottom - rect.top;
@@ -260,7 +262,7 @@ Ext.onReady(function () {
         else if(isColGroupWithFrameSiblings) {
             gapDDRectangle = mouseIsBetweenFrameChilds(target,childGapYs, e.clientY);
             if (gapDDRectangle) {
-                ddTarget.style.top = gapDDRectangle.top;
+                ddTarget.style.top = gapDDRectangle.top + e.view.scrollY;
                 ddTarget.style.left = gapDDRectangle.left;
                 ddTarget.style.width = rect.right - rect.left;
                 ddTarget.style.height = DD_TARGET_HEIGHT;
@@ -277,7 +279,7 @@ Ext.onReady(function () {
 
     };
 
-    canvasParent.addEventListener('mousemove', canvasParentOnMouseMove);
+    canvasParent.addEventListener('dragover', canvasParentOnDragOver);
 
 
 });

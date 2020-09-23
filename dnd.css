@@ -2,12 +2,8 @@
     box-sizing: border-box;
 }
 
-.dd-target-over {
-    background: rgba(56, 147, 212, 0.85);
-}
-
 .dd-target {
-    background: green;
+    background: rgba(56, 147, 212);
     position: absolute;
     width: 0;
     height: 0;
