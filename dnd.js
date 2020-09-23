@@ -93,37 +93,84 @@ Ext.onReady(function () {
         // move dragged elem to the selected drop target
         if (e.target.classList.contains("dd-target")) {
             alert('successfull drop to '+ e.target.className);
-        } else {
-            ddTarget.style.top = 0;
-            ddTarget.style.left = 0;
-            ddTarget.style.width = 0;
-            ddTarget.style.height = 0;
         }
+        ddTarget.style.top = 0;
+        ddTarget.style.left = 0;
+        ddTarget.style.width = 0;
+        ddTarget.style.height = 0;
     }
 
     function dragStart(e) {
+
+        this.classList.add('frame-selected');
+
+        for (let i = 0; i < draggableCells.length; i++) {
+            if(draggableCells[i].classList.contains('frame-selected')) {
+                draggableCells[i].style.opacity = '0.4';
+            }
+        }
+
     }
 
     function drag(e) {
     }
 
     function dragEnd(e) {
+        ddTarget.style.top = 0;
+        ddTarget.style.left = 0;
+        ddTarget.style.width = 0;
+        ddTarget.style.height = 0;
+
+        for (let i = 0; i < draggableCells.length; i++) {
+            if(draggableCells[i].classList.contains('frame-selected')) {
+                draggableCells[i].style.opacity = '1';
+                draggableCells[i].classList.remove('frame-selected');
+            }
+        }
     }
 
-    btnContainer.dom.addEventListener('dragstart', dragStart);
+    function frameOnClick(e) {
+
+        console.log('frameOnClick: ',e, this);
+
+        if (!e.ctrlKey) {
+            for (let i = 0; i < draggableCells.length; i++) {
+                draggableCells[i].classList.remove('frame-selected');
+            }
+        }
+
+        if (this.classList.contains('frame-selected') && e.ctrlKey) {
+            this.classList.remove('frame-selected');
+        } else {
+            this.classList.add('frame-selected');
+        }
+
+    }
+
+
+    btnContainer.dom.addEventListener('dragstart', function(e){
+        this.style.opacity = '0.4';
+    });
     btnContainer.dom.addEventListener('drag', drag);
-    btnContainer.dom.addEventListener('dragend', dragEnd);
+    btnContainer.dom.addEventListener('dragend', function(e){
+        this.style.opacity = '1';
+        ddTarget.style.top = 0;
+        ddTarget.style.left = 0;
+        ddTarget.style.width = 0;
+        ddTarget.style.height = 0;
+    });
 
     ddTarget.addEventListener('dragover', handleDragOver);
     ddTarget.addEventListener('dragenter', handleDragEnter);
     ddTarget.addEventListener('dragleave', handleDragLeave);
     ddTarget.addEventListener('drop', handleDrop);
 
-    let draggableCells = document.querySelectorAll('.frame > div');
+    let draggableCells = document.querySelectorAll('.frame');
 
     draggableCells.forEach(function (item) {
         item.addEventListener('dragstart', dragStart);
         item.addEventListener('dragend', dragEnd);
+        item.addEventListener('click', frameOnClick);
     });
 
 

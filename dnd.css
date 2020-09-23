@@ -1,9 +1,16 @@
 * {
-    box-sizing: border-box;
+    /*box-sizing: border-box;*/
+}
+
+.frame-selected {
+    outline: 1px solid rgb(56, 147, 212);
+    border: 1px solid rgb(56, 147, 212) !important;
+    /*color: rgb(56, 147, 212);*/
+    /*background: rgb(56, 147, 212);*/
 }
 
 .dd-target {
-    background: rgba(56, 147, 212);
+    background: rgb(56, 147, 212);
     position: absolute;
     width: 0;
     height: 0;
@@ -37,9 +44,13 @@
 }
 
 .frame {
+    cursor: pointer;
     flex-basis: 100%;
     padding: 16px;
     border: 1px dotted black;
+
+    min-width: 80px;
+    min-height: 40px;
 }
 
 .frame > div:hover {
@@ -48,10 +59,7 @@
 
 
 .frame > div {
-    cursor: pointer;
     /*border: 1px dotted black;*/
-    min-width: 80px;
-    min-height: 40px;
 
     /* Prevent text selection on all supported browsers*/
     -webkit-touch-callout:none;
