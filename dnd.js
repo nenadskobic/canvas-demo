@@ -71,6 +71,9 @@ Ext.onReady(function () {
     let ddTarget = document.querySelectorAll('.dd-target')[0];
 
 
+    // Drag and drop data
+    let dragData = {};
+
 
     function handleDragOver(e) {
         if(e.preventDefault) {
@@ -98,6 +101,8 @@ Ext.onReady(function () {
         ddTarget.style.left = 0;
         ddTarget.style.width = 0;
         ddTarget.style.height = 0;
+        delete dragData.target;
+        console.log('handle drop');
     }
 
     function dragStart(e) {
@@ -127,24 +132,25 @@ Ext.onReady(function () {
                 draggableCells[i].classList.remove('frame-selected');
             }
         }
+        console.log('dragend');
     }
 
     function frameOnClick(e) {
 
         console.log('frameOnClick: ',e, this);
 
-        if (!e.ctrlKey) {
+        if (!e.shiftKey) {
             for (let i = 0; i < draggableCells.length; i++) {
                 draggableCells[i].classList.remove('frame-selected');
             }
         }
 
-        if (this.classList.contains('frame-selected') && e.ctrlKey) {
+        if (this.classList.contains('frame-selected') && e.shiftKey) {
             this.classList.remove('frame-selected');
         } else {
             this.classList.add('frame-selected');
         }
-
+        e.stopPropagation();
     }
 
 
@@ -178,6 +184,58 @@ Ext.onReady(function () {
      * Hover logic
      */
     let canvasParent = document.querySelectorAll('.canvas-parent')[0];
+
+    // TODO insert/remove elements playground
+
+
+    console.log('canvasParent', canvasParent);
+
+    let rowGroupChild = document.createElement('div');
+    rowGroupChild.className = 'row-group';
+
+    let frameChild = document.createElement('div');
+    frameChild.className = 'frame';
+    frameChild.innerHTML = `<div class="frame-content">Frame 10</div></div>`;
+    rowGroupChild.appendChild(frameChild);
+
+    canvasParent.appendChild(rowGroupChild);
+    canvasParent.removeChild(rowGroupChild);
+
+
+
+    document.querySelector('body').addEventListener('click', function() {
+        for (let i = 0; i < draggableCells.length; i++) {
+            draggableCells[i].classList.remove('frame-selected');
+        }
+    });
+
+
+    // HANDLE FRAME DELETION
+    let deleteEmptyParent = function(nextParent) {
+        if (!nextParent || nextParent.classList.contains('canvas-parent')) { return; }
+
+        let parentNode = nextParent.parentNode;
+
+        if (nextParent.children.length < 1) {
+            parentNode.removeChild(nextParent);
+        }
+
+        deleteEmptyParent(parentNode);
+    };
+
+    document.addEventListener('keydown', function(event) {
+        const key = event.key;
+        if (key === "Delete") {
+            for (let i = 0; i < draggableCells.length; i++) {
+                if (draggableCells[i].classList.contains('frame-selected')) {
+                    let nextParent = draggableCells[i].parentNode;
+                    nextParent.removeChild(draggableCells[i]);
+                    deleteEmptyParent(nextParent);
+                }
+            }
+        }
+    });
+
 
     const DD_TARGET_WIDTH = 16, DD_TARGET_HEIGHT = 16;
 
@@ -236,6 +294,7 @@ Ext.onReady(function () {
             ddTarget.style.left = 0;
             ddTarget.style.width = 0;
             ddTarget.style.height = 0;
+            delete dragData.target;
             return;
         }
 
@@ -321,6 +380,7 @@ Ext.onReady(function () {
             ddTarget.style.left = 0;
             ddTarget.style.width = 0;
             ddTarget.style.height = 0;
+            delete dragData.target;
         }
 
 
