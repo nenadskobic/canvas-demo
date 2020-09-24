@@ -105,9 +105,52 @@ Ext.onReady(function () {
         console.log('handle drop');
     }
 
-    function dragStart(e) {
+    /**
+     * Logic that populated list of prohibited targets (needed for move frame(s) action)
+     * as frame(s) cannot be moved within itself and self parents
+     *
+     */
 
-        this.classList.add('frame-selected');
+    let prohibitedTargets = [];
+
+    const addProhibitedTargets = function() {
+
+        for (let i = 0; i < draggableCells.length; i++) {
+            if(draggableCells[i].classList.contains('frame-selected')) {
+                prohibitedTargets.push(draggableCells[i]);
+            }
+        }
+
+        for (let i = 0; i < prohibitedTargets.length; i++) {
+
+            if (!prohibitedTargets[i] || prohibitedTargets[i].classList.contains('canvas-parent')) {
+                break;
+            }
+
+            let nextParent = prohibitedTargets[i].parentNode;
+
+            let prohibitedChildrenCount = 0;
+
+            for (let j = 0; j < nextParent.children.length; j++) {
+                if (prohibitedTargets.includes(nextParent.children[j])) {
+                    ++prohibitedChildrenCount;
+                }
+            }
+
+            if (prohibitedChildrenCount === nextParent.children.length && !prohibitedTargets.includes(nextParent)) {
+                prohibitedTargets.push(nextParent);
+            }
+
+        }
+    };
+
+    const resetProhibitedTargets = function() {
+        prohibitedTargets = [];
+    };
+
+
+    function frameOnDragStart(e) {
+        addToFrameSelection(this);
 
         for (let i = 0; i < draggableCells.length; i++) {
             if(draggableCells[i].classList.contains('frame-selected')) {
@@ -115,12 +158,13 @@ Ext.onReady(function () {
             }
         }
 
+        addProhibitedTargets();
+        console.log('prohibitedTargets');
+        console.log(prohibitedTargets);
+
     }
 
-    function drag(e) {
-    }
-
-    function dragEnd(e) {
+    function frameOnDragEnd(e) {
         ddTarget.style.top = 0;
         ddTarget.style.left = 0;
         ddTarget.style.width = 0;
@@ -129,26 +173,49 @@ Ext.onReady(function () {
         for (let i = 0; i < draggableCells.length; i++) {
             if(draggableCells[i].classList.contains('frame-selected')) {
                 draggableCells[i].style.opacity = '1';
-                draggableCells[i].classList.remove('frame-selected');
+                removeFromFrameSelection(draggableCells[i]);
             }
         }
-        console.log('dragend');
+
+        resetProhibitedTargets();
+        console.log('dragend, prohibitedTargets: ');
+        console.log(prohibitedTargets);
+
     }
+
+    const frameSelection = [];
+
+    const addToFrameSelection = function(frameNode) {
+        frameNode.classList.add('frame-selected');
+        frameSelection.push(frameNode);
+    };
+
+    const removeFromFrameSelection = function(frameNode) {
+        frameNode.classList.remove('frame-selected');
+        for (let i = frameSelection.length; i >= 0; i--) {
+            if (frameSelection[i] === frameNode) {
+                frameSelection.splice(i, 1);
+            }
+        }
+
+
+    };
 
     function frameOnClick(e) {
 
         console.log('frameOnClick: ',e, this);
+        console.log(e.target);
 
         if (!e.shiftKey) {
             for (let i = 0; i < draggableCells.length; i++) {
-                draggableCells[i].classList.remove('frame-selected');
+                removeFromFrameSelection(draggableCells[i]);
             }
         }
 
         if (this.classList.contains('frame-selected') && e.shiftKey) {
-            this.classList.remove('frame-selected');
+            removeFromFrameSelection(this);
         } else {
-            this.classList.add('frame-selected');
+            addToFrameSelection(this);
         }
         e.stopPropagation();
     }
@@ -157,7 +224,7 @@ Ext.onReady(function () {
     btnContainer.dom.addEventListener('dragstart', function(e){
         this.style.opacity = '0.4';
     });
-    btnContainer.dom.addEventListener('drag', drag);
+    btnContainer.dom.addEventListener('drag', function(e){});
     btnContainer.dom.addEventListener('dragend', function(e){
         this.style.opacity = '1';
         ddTarget.style.top = 0;
@@ -174,8 +241,8 @@ Ext.onReady(function () {
     let draggableCells = document.querySelectorAll('.frame');
 
     draggableCells.forEach(function (item) {
-        item.addEventListener('dragstart', dragStart);
-        item.addEventListener('dragend', dragEnd);
+        item.addEventListener('dragstart', frameOnDragStart);
+        item.addEventListener('dragend', frameOnDragEnd);
         item.addEventListener('click', frameOnClick);
     });
 
@@ -205,7 +272,7 @@ Ext.onReady(function () {
 
     document.querySelector('body').addEventListener('click', function() {
         for (let i = 0; i < draggableCells.length; i++) {
-            draggableCells[i].classList.remove('frame-selected');
+            removeFromFrameSelection(draggableCells[i]);
         }
     });
 
@@ -235,6 +302,8 @@ Ext.onReady(function () {
             }
         }
     });
+
+
 
 
     const DD_TARGET_WIDTH = 16, DD_TARGET_HEIGHT = 16;
@@ -289,7 +358,9 @@ Ext.onReady(function () {
         const target = e.target;
         let gapDDRectangle;
 
-        if (!nodeContainsValidGroupCls(target)) {
+        if (!nodeContainsValidGroupCls(target) ||
+            (!e.altKey && prohibitedTargets.includes(e.target))
+        ) {
             ddTarget.style.top = 0;
             ddTarget.style.left = 0;
             ddTarget.style.width = 0;
