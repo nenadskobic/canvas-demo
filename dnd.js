@@ -138,15 +138,19 @@ Ext.onReady(function () {
             if (el.classList.contains('row-group')) {
                 el.classList.remove('row-group');
                 el.classList.add('col-group');
-                innerGroup = document.createElement('div');
-                innerGroup.className = 'row-group';
 
-
+                if(el.children.length > 0) {
+                    innerGroup = document.createElement('div');
+                    innerGroup.className = 'row-group';
+                }
             } else if (el.classList.contains('col-group')){
                 el.classList.remove('col-group');
                 el.classList.add('row-group');
-                innerGroup = document.createElement('div');
-                innerGroup.className = 'col-group';
+
+                if(el.children.length > 0) {
+                    innerGroup = document.createElement('div');
+                    innerGroup.className = 'col-group';
+                }
             }
 
             if (innerGroup) {
@@ -161,6 +165,10 @@ Ext.onReady(function () {
                     } else {
                         el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
                     }
+                }
+            } else {
+                for (let i = 0; i < dragData.source.selectionSize; i++) {
+                    el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
                 }
             }
         } else if (dragData.target.type === 'SplitFrame') {
@@ -471,6 +479,10 @@ Ext.onReady(function () {
         if (nextParent.children.length < 1) {
             parentNode.removeChild(nextParent);
         }
+        if (nextParent.children.length === 1 && nextParent.children[0].classList.contains('frame')) {
+            parentNode.insertBefore(nextParent.children[0], nextParent);
+            parentNode.removeChild(nextParent);
+        }
 
         deleteEmptyParent(parentNode);
     };
@@ -479,13 +491,15 @@ Ext.onReady(function () {
         const key = event.key;
         if (key === "Delete") {
             let newDraggableCells = document.querySelectorAll('.frame');
+
+
             for (let i = 0; i < newDraggableCells.length; i++) {
                 if (newDraggableCells[i].classList.contains('frame-selected')) {
                     let nextParent = newDraggableCells[i].parentNode;
                     nextParent.removeChild(newDraggableCells[i]);
 
 
-                    if(nextParent.children.length === 1 && nextParent.children[0].classList.contains('frame')) {
+                    if (nextParent.children.length === 1 && nextParent.children[0].classList.contains('frame')) {
                         let groupParent = nextParent.parentNode;
                         groupParent.insertBefore(nextParent.children[0], nextParent);
                         groupParent.removeChild(nextParent);
@@ -495,7 +509,23 @@ Ext.onReady(function () {
                     }
                 }
             }
+
             selectedFrames = [];
+
+            newDraggableCells = document.querySelectorAll('.frame');
+            if (newDraggableCells.length <= 1) {
+                let newRoot = document.createElement('div');
+                newRoot.className = 'col-group';
+
+                if (newDraggableCells.length === 1) {
+                    newRoot.appendChild(newDraggableCells[0]);
+                }
+
+                while (canvasParent.childNodes.length) {
+                    canvasParent.removeChild(canvasParent.firstChild);
+                }
+                canvasParent.appendChild(newRoot);
+            }
         }
     });
 
