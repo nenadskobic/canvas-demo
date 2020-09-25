@@ -47,13 +47,21 @@ Ext.onReady(function () {
                             items: [
                                 {
                                     text: 'Report',
+                                    cls: 'reportBtn',
+                                    focusCls: '',
                                     height: 32,
                                     handler: function () {
                                     }
-                                }
+                                },
 
                             ]
-                        }]
+                        },'->',
+                        {
+                            xtype: 'button',
+                            text: 'Shift + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'
+                        }
+
+                        ]
                 })
             }, {
                 title: 'Second Tab',
@@ -74,6 +82,163 @@ Ext.onReady(function () {
     // Drag and drop data
     let dragData = {};
 
+    const getNewFrameNode = function(n) {
+        const frameChild = document.createElement('div');
+        frameChild.className = 'frame';
+        frameChild.draggable = true;
+        frameChild.innerHTML = '<div class="frame-content">' + n + '</div></div>';
+        frameChild.classList.add('frame-selected');
+
+        appendListenersToFrameNode(frameChild);
+        return frameChild;
+    };
+
+    const appendListenersToFrameNode = function(node) {
+        node.addEventListener('dragstart', frameOnDragStart);
+        node.addEventListener('dragend', frameOnDragEnd);
+        node.addEventListener('click', frameOnClick);
+    };
+
+
+    const calcFrameName = function(selectionIndex, isCopyAction) {
+        let frameName = newFrameName();
+
+        if (dragData.source.type !== 'Button') {
+            const frameInnerText = selectedFrames[selectionIndex].children[0].innerText;
+            frameName = isCopyAction ? frameInnerText.concat(' - Copy') : frameInnerText;
+        }
+        return frameName;
+    };
+
+
+    const injectSelection = function(isCopyAction) {
+
+
+        //if (dragData.source.type === 'Button' || dragData.source.selectionSize === 1) {
+        let el = dragData.target.el;
+        let referencedChildIndex = dragData.target.between[0];
+        let referencedChildNode = el.children[referencedChildIndex];
+
+        if (dragData.target.type === 'InBetween') {
+
+            for (let i = 0; i < dragData.source.selectionSize; i++) {
+                // Add node at the end
+                if (referencedChildIndex >= el.children.length) {
+                    el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
+                }
+                // Insert before referenced child node
+                else {
+                    el.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), referencedChildNode);
+                }
+            }
+        } else if (dragData.target.type === 'NewDirection') {
+
+            let innerGroup;
+
+            if (el.classList.contains('row-group')) {
+                el.classList.remove('row-group');
+                el.classList.add('col-group');
+                innerGroup = document.createElement('div');
+                innerGroup.className = 'row-group';
+
+
+            } else if (el.classList.contains('col-group')){
+                el.classList.remove('col-group');
+                el.classList.add('row-group');
+                innerGroup = document.createElement('div');
+                innerGroup.className = 'col-group';
+            }
+
+            if (innerGroup) {
+                while (el.childNodes.length) {
+                    innerGroup.appendChild(el.firstChild);
+                }
+                el.appendChild(innerGroup);
+
+                for (let i = 0; i < dragData.source.selectionSize; i++) {
+                    if (dragData.target.direction === 'top' || dragData.target.direction === 'left') {
+                        el.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), innerGroup);
+                    } else {
+                        el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
+                    }
+                }
+            }
+        } else if (dragData.target.type === 'SplitFrame') {
+
+            if (dragData.target.direction === 'left' || dragData.target.direction === 'right') {
+                let newGroup = document.createElement('div');
+                newGroup.className = 'row-group';
+
+                el.parentNode.insertBefore(newGroup, el);
+                newGroup.appendChild(el);
+
+                for (let i = 0; i < dragData.source.selectionSize; i++) {
+                    if (dragData.target.direction === 'left') {
+                        newGroup.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), el);
+                    } else {
+                        newGroup.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
+                    }
+                }
+            } else {
+
+                let newGroup = document.createElement('div');
+                newGroup.className = 'col-group';
+
+                el.parentNode.insertBefore(newGroup, el);
+                newGroup.appendChild(el);
+
+                for (let i = 0; i < dragData.source.selectionSize; i++) {
+                    if (dragData.target.direction === 'left') {
+                        newGroup.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), el);
+                    } else {
+                        newGroup.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
+                    }
+                }
+            }
+        }
+
+    };
+
+    const deleteSelection = function() {
+
+        for (let i = 0; i < selectedFrames.length; i++) {
+            let nextParent = selectedFrames[i].parentNode;
+            nextParent.removeChild(selectedFrames[i]);
+            deleteEmptyParent(nextParent);
+        }
+
+    };
+
+    const processValidDrop = function(e) {
+
+        let isCopyAction = e.altKey;
+
+        if (isCopyAction) {
+            injectSelection(isCopyAction);
+        }
+        else {
+            injectSelection(isCopyAction);
+            if (dragData.source.type !== 'Button') {
+                deleteSelection();
+            }
+
+        }
+
+
+        selectedFrames = [];
+
+        let newDraggableCells = document.querySelectorAll('.frame');
+
+        for (let i = 0; i < newDraggableCells.length; i++) {
+            if (newDraggableCells[i].classList.contains('frame-selected')) {
+                addToFrameSelection(newDraggableCells[i]);
+            }
+        }
+
+
+
+    };
+
 
     function handleDragOver(e) {
         if(e.preventDefault) {
@@ -92,10 +257,14 @@ Ext.onReady(function () {
             e.preventDefault();
         }
 
-        console.log(e.target.classList);
-        // move dragged elem to the selected drop target
+        console.log(e);
+        console.log(this);
+
+        console.log('---------ON DROP----------');
+        // drag source is over drag target
         if (e.target.classList.contains("dd-target")) {
-            alert('successfull drop to '+ e.target.className);
+            processValidDrop(e);
+            //alert('successfull drop to '+ e.target.className);
         }
         ddTarget.style.top = 0;
         ddTarget.style.left = 0;
@@ -159,6 +328,12 @@ Ext.onReady(function () {
         }
 
         addProhibitedTargets();
+
+        dragData.source = {
+            type: 'Frame',
+            selectionSize: selectedFrames.length
+        };
+
         console.log('prohibitedTargets');
         console.log(prohibitedTargets);
 
@@ -183,18 +358,20 @@ Ext.onReady(function () {
 
     }
 
-    const frameSelection = [];
+    let selectedFrames = [];
 
     const addToFrameSelection = function(frameNode) {
         frameNode.classList.add('frame-selected');
-        frameSelection.push(frameNode);
+        if (!selectedFrames.includes(frameNode)) {
+            selectedFrames.push(frameNode);
+        }
     };
 
     const removeFromFrameSelection = function(frameNode) {
         frameNode.classList.remove('frame-selected');
-        for (let i = frameSelection.length; i >= 0; i--) {
-            if (frameSelection[i] === frameNode) {
-                frameSelection.splice(i, 1);
+        for (let i = selectedFrames.length; i >= 0; i--) {
+            if (selectedFrames[i] === frameNode) {
+                selectedFrames.splice(i, 1);
             }
         }
 
@@ -223,6 +400,10 @@ Ext.onReady(function () {
 
     btnContainer.dom.addEventListener('dragstart', function(e){
         this.style.opacity = '0.4';
+        dragData.source = {
+            type: 'Button',
+            selectionSize: 1
+        };
     });
     btnContainer.dom.addEventListener('drag', function(e){});
     btnContainer.dom.addEventListener('dragend', function(e){
@@ -252,10 +433,9 @@ Ext.onReady(function () {
      */
     let canvasParent = document.querySelectorAll('.canvas-parent')[0];
 
-    // TODO insert/remove elements playground
-
-
     console.log('canvasParent', canvasParent);
+
+    // Playground
 
     let rowGroupChild = document.createElement('div');
     rowGroupChild.className = 'row-group';
@@ -300,6 +480,7 @@ Ext.onReady(function () {
                     deleteEmptyParent(nextParent);
                 }
             }
+            selectedFrames = [];
         }
     });
 
@@ -325,7 +506,7 @@ Ext.onReady(function () {
      * @param gapXOrYs - self explainable
      * @param clientXorY - self explainable
      */
-    let mouseIsBetweenFrameChilds = function(group, gapXOrYs, clientXorY) {
+    let mouseIsBetweenGroupChildren = function(group, gapXOrYs, clientXorY) {
 
         if (group.classList.contains('row-group')) {
             for (let i = 0; i < gapXOrYs.length; i+=2) {
@@ -351,6 +532,22 @@ Ext.onReady(function () {
         return node.classList.contains('frame') ||
             node.classList.contains('row-group') ||
             node.classList.contains('col-group');
+    };
+
+
+    let getInBetweenIndexes = function(mouseXOrY, gapXorYs, defaultValue) {
+
+        for (let i = 0; i < gapXorYs.length; i+=2) {
+
+            let first = gapXorYs[i];
+            let second = gapXorYs[i+1];
+
+            if (mouseXOrY >= first && mouseXOrY <= second) {
+                let firstIndex = parseInt(i/2+1);
+                return [firstIndex, firstIndex + 1];
+            }
+        }
+        return defaultValue;
     };
 
     let canvasParentOnDragOver = function(e) {
@@ -403,6 +600,21 @@ Ext.onReady(function () {
             ddTarget.style.left = rect.left;
             ddTarget.style.width = DD_TARGET_WIDTH;
             ddTarget.style.height = rect.bottom - rect.top;
+
+            let type = 'SplitFrame';
+
+            if (target.classList.contains('row-group')) {
+                type = 'InBetween';
+            } else if (target.classList.contains('col-group')) {
+                type = 'NewDirection';
+            }
+
+            dragData.target = {
+                type: type,
+                el: target,
+                between: [0, 1],
+                direction: 'left'
+            };
         }
         // Mouse over right inner zone
         else if (e.clientX >= rect.right - DD_TARGET_WIDTH) {
@@ -410,6 +622,23 @@ Ext.onReady(function () {
             ddTarget.style.left = rect.right - DD_TARGET_WIDTH;
             ddTarget.style.width = DD_TARGET_WIDTH;
             ddTarget.style.height = rect.bottom - rect.top;
+
+            let type = 'SplitFrame', between = [0, 1];
+
+            if (target.classList.contains('row-group')) {
+                type = 'InBetween';
+                between = [target.children.length, target.children.length + 1];
+            } else if (target.classList.contains('col-group')) {
+                type = 'NewDirection';
+            }
+
+            dragData.target = {
+                type: type,
+                el: target,
+                between: between,
+                direction: 'right'
+            };
+
         }
         // Mouse over top inner zone
         else if (e.clientY <= rect.top + DD_TARGET_HEIGHT ) {
@@ -417,6 +646,21 @@ Ext.onReady(function () {
             ddTarget.style.left = rect.left;
             ddTarget.style.width = rect.right - rect.left;
             ddTarget.style.height = DD_TARGET_HEIGHT;
+
+            let type = 'SplitFrame';
+
+            if (target.classList.contains('row-group')) {
+                type = 'NewDirection';
+            } else if (target.classList.contains('col-group')) {
+                type = 'InBetween';
+            }
+
+            dragData.target = {
+                type: type,
+                el: target,
+                between: [0, 1],
+                direction: 'top'
+            };
         }
         // Mouse over bottom inner zone
         else if (e.clientY >= rect.bottom - DD_TARGET_HEIGHT) {
@@ -424,25 +668,55 @@ Ext.onReady(function () {
             ddTarget.style.left = rect.left;
             ddTarget.style.width = rect.right - rect.left;
             ddTarget.style.height = DD_TARGET_HEIGHT;
+
+            let type = 'SplitFrame', between = [0, 1];
+
+            if (target.classList.contains('row-group')) {
+                type = 'NewDirection';
+            } else if (target.classList.contains('col-group')) {
+                type = 'InBetween';
+                between = [target.children.length, target.children.length + 1];
+            }
+
+            dragData.target = {
+                type: type,
+                el: target,
+                between: between,
+                direction: 'bottom'
+            };
         }
         // Mouse between two row-group childs
         else if(isRowGroupWithFrameSiblings) {
-            gapDDRectangle = mouseIsBetweenFrameChilds(target,childGapXs, e.clientX);
+            gapDDRectangle = mouseIsBetweenGroupChildren(target, childGapXs, e.clientX);
             if (gapDDRectangle) {
                 ddTarget.style.top = gapDDRectangle.top + e.view.scrollY;
                 ddTarget.style.left = gapDDRectangle.left;
                 ddTarget.style.width = DD_TARGET_WIDTH;
                 ddTarget.style.height = rect.bottom - rect.top;
+
+                dragData.target = {
+                    type: 'InBetween',
+                    el: target,
+                    between: getInBetweenIndexes(e.clientX, childGapXs, [target.children.length, target.children.length + 1]),
+                    direction: 'right'
+                };
             }
         }
         // Mouse between two col-group childs
         else if(isColGroupWithFrameSiblings) {
-            gapDDRectangle = mouseIsBetweenFrameChilds(target,childGapYs, e.clientY);
+            gapDDRectangle = mouseIsBetweenGroupChildren(target, childGapYs, e.clientY);
             if (gapDDRectangle) {
                 ddTarget.style.top = gapDDRectangle.top + e.view.scrollY;
                 ddTarget.style.left = gapDDRectangle.left;
                 ddTarget.style.width = rect.right - rect.left;
                 ddTarget.style.height = DD_TARGET_HEIGHT;
+
+                dragData.target = {
+                    type: 'InBetween',
+                    el: target,
+                    between: getInBetweenIndexes(e.clientY, childGapYs, [target.children.length, target.children.length + 1]),
+                    direction: 'bottom'
+                };
             }
         }
         // Mouse over free zone (no dd targets located here)
@@ -458,6 +732,29 @@ Ext.onReady(function () {
     };
 
     canvasParent.addEventListener('dragover', canvasParentOnDragOver);
+
+
+
+    /* Get next available frame name */
+
+    const newFrameName = function() {
+
+        const frames = document.querySelectorAll('.frame > div');
+
+        const ids = [];
+
+        for (let i = 0; i < frames.length; i++) {
+            let n = frames[i].textContent.split(' ')[1];
+            ids.push(parseInt(n));
+        }
+        const next = Math.max(...ids) + 1;
+
+        if (next < 1) {
+            return 'Frame 1';
+        } else {
+            return 'Frame ' + next;
+        }
+    };
 
 
 });

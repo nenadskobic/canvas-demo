@@ -31,7 +31,8 @@
 .col-group, .row-group {
     border: 1px dotted black;
     padding: 16px;
-    flex-basis: 100%;
+    flex-shrink: 1;
+    flex-grow: 1;
     gap: 16px;
 }
 
@@ -45,11 +46,12 @@
 
 .frame {
     cursor: pointer;
-    flex-basis: 100%;
+    flex-shrink: 1;
+    flex-grow: 1;
     padding: 16px;
     border: 1px dotted black;
 
-    min-width: 80px;
+    /*min-width: 32px;*/
     min-height: 40px;
 }
 
