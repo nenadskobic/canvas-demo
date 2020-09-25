@@ -504,7 +504,7 @@ Ext.onReady(function () {
         if (nextParent.children.length < 1) {
             parentNode.removeChild(nextParent);
         }
-        if (nextParent.children.length === 1 && nextParent.children[0].classList.contains('frame')) {
+        if (nextParent.children.length === 1) {
             parentNode.insertBefore(nextParent.children[0], nextParent);
             parentNode.removeChild(nextParent);
         }
