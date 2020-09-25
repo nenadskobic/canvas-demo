@@ -58,7 +58,7 @@ Ext.onReady(function () {
                         },'->',
                         {
                             xtype: 'button',
-                            text: 'Shift + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'
+                            text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'
                         }
 
                         ]
@@ -392,14 +392,16 @@ Ext.onReady(function () {
     function frameOnClick(e) {
 
 
-        if (!e.shiftKey) {
+        console.log(e);
+
+        if (!e.ctrlKey && !e.metaKey) {
             let newDraggableCells = document.querySelectorAll('.frame');
             for (let i = 0; i < newDraggableCells.length; i++) {
                 removeFromFrameSelection(newDraggableCells[i]);
             }
         }
 
-        if (this.classList.contains('frame-selected') && e.shiftKey) {
+        if (this.classList.contains('frame-selected') && (e.ctrlKey || e.metaKey)) {
             removeFromFrameSelection(this);
         } else {
             addToFrameSelection(this);
