@@ -55,7 +55,30 @@ Ext.onReady(function () {
                                 },
 
                             ]
-                        },'->',
+                        },
+                        '->',
+                        {
+                            xtype: 'button',
+                            text: 'Show preview',
+                            height: 32,
+                            enableToggle: true,
+                            pressed: false,
+                            listeners: {
+                                toggle: function(cmp, newState) {
+
+                                    let allGroups = document.querySelectorAll('.row-group, .col-group');
+
+                                    let action  = newState ? 'add' : 'remove';
+
+                                    for (let i = 0; i < allGroups.length; i++) {
+                                        allGroups[i].classList[action]('drag-padding');
+                                    }
+
+
+                                }
+                            }
+
+                        },
                         {
                             xtype: 'button',
                             text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'

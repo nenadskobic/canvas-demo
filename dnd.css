@@ -33,8 +33,8 @@
 }
 
 .col-group, .row-group {
-    border: 1px dotted black;
     padding: 16px;
+    border: 1px dotted black;
     flex-shrink: 1;
     flex-grow: 1;
     gap: 16px;
@@ -46,6 +46,11 @@
 
 .row-group:hover {
     /*background: #5c8ab1;*/
+}
+
+.drag-padding {
+    padding: 0 !important;
+    border: 1px dotted #ffffff !important;
 }
 
 .frame {
