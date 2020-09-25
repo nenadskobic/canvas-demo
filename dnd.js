@@ -204,7 +204,15 @@ Ext.onReady(function () {
         for (let i = 0; i < selectedFrames.length; i++) {
             let nextParent = selectedFrames[i].parentNode;
             nextParent.removeChild(selectedFrames[i]);
-            deleteEmptyParent(nextParent);
+
+            if(nextParent.children.length === 1 && nextParent.children[0].classList.contains('frame')) {
+                let groupParent = nextParent.parentNode;
+                groupParent.insertBefore(nextParent.children[0], nextParent);
+                groupParent.removeChild(nextParent);
+                deleteEmptyParent(groupParent);
+            } else {
+                deleteEmptyParent(nextParent);
+            }
         }
 
     };
@@ -258,10 +266,6 @@ Ext.onReady(function () {
             e.preventDefault();
         }
 
-        console.log(e);
-        console.log(this);
-
-        console.log('---------ON DROP----------');
         // drag source is over drag target
         if (e.target.classList.contains("dd-target")) {
             processValidDrop(e);
@@ -272,7 +276,6 @@ Ext.onReady(function () {
         ddTarget.style.width = 0;
         ddTarget.style.height = 0;
         delete dragData.target;
-        console.log('handle drop');
     }
 
     /**
@@ -339,8 +342,6 @@ Ext.onReady(function () {
             selectionSize: selectedFrames.length
         };
 
-        console.log('prohibitedTargets');
-        console.log(prohibitedTargets);
 
     }
 
@@ -357,8 +358,6 @@ Ext.onReady(function () {
         }
 
         resetProhibitedTargets();
-        console.log('dragend, prohibitedTargets: ');
-        console.log(prohibitedTargets);
 
     }
 
@@ -384,8 +383,6 @@ Ext.onReady(function () {
 
     function frameOnClick(e) {
 
-        console.log('frameOnClick: ',e, this);
-        console.log(e.target);
 
         if (!e.shiftKey) {
             let newDraggableCells = document.querySelectorAll('.frame');
@@ -438,7 +435,6 @@ Ext.onReady(function () {
      */
     let canvasParent = document.querySelectorAll('.canvas-parent')[0];
 
-    console.log('canvasParent', canvasParent);
 
     // Playground
 
@@ -465,9 +461,12 @@ Ext.onReady(function () {
 
     // HANDLE FRAME DELETION
     let deleteEmptyParent = function(nextParent) {
+
+
         if (!nextParent || nextParent.classList.contains('canvas-parent')) { return; }
 
         let parentNode = nextParent.parentNode;
+
 
         if (nextParent.children.length < 1) {
             parentNode.removeChild(nextParent);
@@ -484,7 +483,16 @@ Ext.onReady(function () {
                 if (newDraggableCells[i].classList.contains('frame-selected')) {
                     let nextParent = newDraggableCells[i].parentNode;
                     nextParent.removeChild(newDraggableCells[i]);
-                    deleteEmptyParent(nextParent);
+
+
+                    if(nextParent.children.length === 1 && nextParent.children[0].classList.contains('frame')) {
+                        let groupParent = nextParent.parentNode;
+                        groupParent.insertBefore(nextParent.children[0], nextParent);
+                        groupParent.removeChild(nextParent);
+                        deleteEmptyParent(groupParent);
+                    } else {
+                        deleteEmptyParent(nextParent);
+                    }
                 }
             }
             selectedFrames = [];
