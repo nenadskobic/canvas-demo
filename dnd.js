@@ -231,7 +231,8 @@ Ext.onReady(function () {
 
         for (let i = 0; i < newDraggableCells.length; i++) {
             if (newDraggableCells[i].classList.contains('frame-selected')) {
-                addToFrameSelection(newDraggableCells[i]);
+                newDraggableCells[i].classList.remove('frame-selected');
+                //addToFrameSelection(newDraggableCells[i]);
             }
         }
 
@@ -284,9 +285,11 @@ Ext.onReady(function () {
 
     const addProhibitedTargets = function() {
 
-        for (let i = 0; i < draggableCells.length; i++) {
-            if(draggableCells[i].classList.contains('frame-selected')) {
-                prohibitedTargets.push(draggableCells[i]);
+        let newDraggableCells = document.querySelectorAll('.frame');
+
+        for (let i = 0; i < newDraggableCells.length; i++) {
+            if(newDraggableCells[i].classList.contains('frame-selected')) {
+                prohibitedTargets.push(newDraggableCells[i]);
             }
         }
 
@@ -321,9 +324,11 @@ Ext.onReady(function () {
     function frameOnDragStart(e) {
         addToFrameSelection(this);
 
-        for (let i = 0; i < draggableCells.length; i++) {
-            if(draggableCells[i].classList.contains('frame-selected')) {
-                draggableCells[i].style.opacity = '0.4';
+        let newDraggableCells = document.querySelectorAll('.frame');
+
+        for (let i = 0; i < newDraggableCells.length; i++) {
+            if (newDraggableCells[i].classList.contains('frame-selected')) {
+                newDraggableCells[i].style.opacity = '0.4';
             }
         }
 
@@ -345,11 +350,10 @@ Ext.onReady(function () {
         ddTarget.style.width = 0;
         ddTarget.style.height = 0;
 
-        for (let i = 0; i < draggableCells.length; i++) {
-            if(draggableCells[i].classList.contains('frame-selected')) {
-                draggableCells[i].style.opacity = '1';
-                removeFromFrameSelection(draggableCells[i]);
-            }
+        let newDraggableCells = document.querySelectorAll('.frame');
+
+        for (let i = 0; i < newDraggableCells.length; i++) {
+            newDraggableCells[i].style.opacity = '1';
         }
 
         resetProhibitedTargets();
@@ -384,8 +388,9 @@ Ext.onReady(function () {
         console.log(e.target);
 
         if (!e.shiftKey) {
-            for (let i = 0; i < draggableCells.length; i++) {
-                removeFromFrameSelection(draggableCells[i]);
+            let newDraggableCells = document.querySelectorAll('.frame');
+            for (let i = 0; i < newDraggableCells.length; i++) {
+                removeFromFrameSelection(newDraggableCells[i]);
             }
         }
 
@@ -451,8 +456,9 @@ Ext.onReady(function () {
 
 
     document.querySelector('body').addEventListener('click', function() {
-        for (let i = 0; i < draggableCells.length; i++) {
-            removeFromFrameSelection(draggableCells[i]);
+        let newDraggableCells = document.querySelectorAll('.frame');
+        for (let i = 0; i < newDraggableCells.length; i++) {
+            removeFromFrameSelection(newDraggableCells[i]);
         }
     });
 
@@ -473,10 +479,11 @@ Ext.onReady(function () {
     document.addEventListener('keydown', function(event) {
         const key = event.key;
         if (key === "Delete") {
-            for (let i = 0; i < draggableCells.length; i++) {
-                if (draggableCells[i].classList.contains('frame-selected')) {
-                    let nextParent = draggableCells[i].parentNode;
-                    nextParent.removeChild(draggableCells[i]);
+            let newDraggableCells = document.querySelectorAll('.frame');
+            for (let i = 0; i < newDraggableCells.length; i++) {
+                if (newDraggableCells[i].classList.contains('frame-selected')) {
+                    let nextParent = newDraggableCells[i].parentNode;
+                    nextParent.removeChild(newDraggableCells[i]);
                     deleteEmptyParent(nextParent);
                 }
             }
