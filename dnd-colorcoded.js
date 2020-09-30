@@ -211,6 +211,28 @@ Ext.onReady(function () {
 
         if (dragData && dragData.target) {
             let targetRect = dragData.target.el.getBoundingClientRect();
+
+
+            switch (dragDataList[0].target.direction) {
+                case 'top':
+                case 'bottom':
+                    this._oldleft = this.style.left;
+                    this._oldwidth = this.style.width;
+                    this.style.left = targetRect.left;
+                    this.style.width = targetRect.right - targetRect.left;
+                    break;
+                case 'right':
+                case 'left':
+                    this._oldtop = this.style.top;
+                    this._oldheight = this.style.height;
+                    this.style.top = targetRect.top;
+                    this.style.height = targetRect.bottom - targetRect.top;
+                    break;
+                default:
+                    break;
+            }
+
+
             ddZone.style.top = targetRect.top + 2;
             ddZone.style.left = targetRect.left + 2;
             ddZone.style.width = targetRect.right - targetRect.left - 4;
@@ -220,6 +242,23 @@ Ext.onReady(function () {
     }
     function ddTargetOnDragLeave(e) {
         --enteredZones;
+
+        switch (dragDataList[0].target.direction) {
+            case 'top':
+            case 'bottom':
+                if (this._oldleft) {this.style.left = this._oldleft;}
+                if (this._oldwidth) {this.style.width = this._oldwidth;}
+                break;
+            case 'right':
+            case 'left':
+                if (this._oldtop) {this.style.top = this._oldtop;}
+                if (this._oldheight) {this.style.height = this._oldheight;}
+                break;
+            default:
+                break;
+        }
+
+
 
         if (enteredZones < 1) {
             ddZone.style.top = 0; ddZone.style.left = 0; ddZone.style.width = 0; ddZone.style.height = 0;
@@ -506,13 +545,13 @@ Ext.onReady(function () {
 
 
 
-        if (lastClosestFrame === closestFrame && lastDirection === overDirection) {
+       // if (lastClosestFrame === closestFrame && lastDirection === overDirection) {
             // Do nothing => every drop target stays at exactly same place
-        } else {
-            lastClosestFrame = closestFrame;
-            lastDirection = overDirection;
+       // } else {
+       //     lastClosestFrame = closestFrame;
+        //    lastDirection = overDirection;
             setTargetPositions(closestFrame, overDirection);
-        }
+      //  }
 
     };
 
@@ -698,7 +737,6 @@ Ext.onReady(function () {
 
     const setTargetPositions = function(closestFrame, direction) {
 
-
         dragDataList = [];
         let zoneData = countFrameDDZonesForDirection(closestFrame, direction, 0);
 
@@ -714,16 +752,16 @@ Ext.onReady(function () {
                     let top, left, width, height;
                     if (i === 0 && zoneData.firstZoneType === 'gap') {
                         top = zoneData.gapRect.top;
-                        left = zoneData.gapRect.left;
-                        width = zoneData.gapRect.width;
+                        left = frRect.left;
+                        width = frRect.right - frRect.left;
                         height = zoneData.gapRect.height;
                         lastBottom = top + height;
                     } else if (i === 0 && zoneData.firstZoneType === 'edge') {
                         let dragData = getDragDataOnReversedIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
                         top = frRect.top - DD_HEIGHT;
-                        left = targetRect.left;
-                        width = targetRect.right - targetRect.left;
+                        left = frRect.left;
+                        width = frRect.right - frRect.left;
                         height = DD_HEIGHT;
                         lastBottom = top + height;
 
@@ -731,8 +769,8 @@ Ext.onReady(function () {
                         let dragData = getDragDataOnReversedIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
                         top = lastBottom;
-                        left = targetRect.left;
-                        width = targetRect.right - targetRect.left;
+                        left = frRect.left;
+                        width = frRect.right - frRect.left;
                         height = DD_HEIGHT;
                         lastBottom = top + height;
                     }
@@ -759,16 +797,16 @@ Ext.onReady(function () {
                     let top, left, width, height;
                     if (i === zoneData.count - 1 && zoneData.firstZoneType === 'gap') {
                         top = zoneData.gapRect.top;
-                        left = zoneData.gapRect.left;
-                        width = zoneData.gapRect.width;
+                        left = frRect.left;
+                        width = frRect.right - frRect.left;
                         height = zoneData.gapRect.height;
                         lastTop = top;
                     } else if (i === zoneData.count - 1 && zoneData.firstZoneType === 'edge') {
                         let dragData = getDragDataOnNormalIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
                         top = frRect.bottom;
-                        left = targetRect.left;
-                        width = targetRect.right - targetRect.left;
+                        left = frRect.left;
+                        width = frRect.right - frRect.left;
                         height = DD_HEIGHT;
                         lastTop = top;
 
@@ -776,8 +814,8 @@ Ext.onReady(function () {
                         let dragData = getDragDataOnNormalIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
                         top = lastTop - DD_HEIGHT;
-                        left = targetRect.left;
-                        width = targetRect.right - targetRect.left;
+                        left = frRect.left;
+                        width = frRect.right - frRect.left;
                         height = DD_HEIGHT;
                         lastTop = top;
                     }
@@ -806,27 +844,27 @@ Ext.onReady(function () {
                 for (let i = 0; i < zoneData.count; i++) {
                     let top, left, width, height;
                     if (i === 0 && zoneData.firstZoneType === 'gap') {
-                        top = zoneData.gapRect.top;
+                        top = frRect.top;
                         left = zoneData.gapRect.left;
                         width = zoneData.gapRect.width;
-                        height = zoneData.gapRect.height;
+                        height = frRect.bottom - frRect.top;
                         lastRight = left + width;
                     } else if (i === 0 && zoneData.firstZoneType === 'edge') {
                         let dragData = getDragDataOnReversedIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = targetRect.top;
+                        top = frRect.top;
                         left = frRect.left - DD_WIDTH;
                         width = DD_WIDTH;
-                        height = targetRect.bottom - targetRect.top;
+                        height = frRect.bottom - frRect.top;
                         lastRight = left + width;
 
                     } else {
                         let dragData = getDragDataOnReversedIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = targetRect.top;
+                        top = frRect.top;
                         left = lastRight;
                         width = DD_WIDTH;
-                        height = targetRect.bottom - targetRect.top;
+                        height = frRect.bottom - frRect.top;
                         lastRight = left + width;
                     }
 
@@ -853,27 +891,27 @@ Ext.onReady(function () {
                 for (let i = zoneData.count - 1; i >= 0; i--) {
                     let top, left, width, height;
                     if (i === zoneData.count - 1 && zoneData.firstZoneType === 'gap') {
-                        top = zoneData.gapRect.top;
+                        top = frRect.top;
                         left = zoneData.gapRect.left;
                         width = zoneData.gapRect.width;
-                        height = zoneData.gapRect.height;
+                        height = frRect.bottom - frRect.top;
                         lastLeft = left;
                     } else if (i === zoneData.count - 1 && zoneData.firstZoneType === 'edge') {
                         let dragData = getDragDataOnNormalIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = targetRect.top;
+                        top = frRect.top;
                         left = frRect.right;
                         width = DD_WIDTH;
-                        height = targetRect.bottom - targetRect.top;
+                        height = frRect.bottom - frRect.top;
                         lastLeft = left;
 
                     } else {
                         let dragData = getDragDataOnNormalIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = targetRect.top;
+                        top = frRect.top;
                         left = lastLeft - DD_WIDTH;
                         width = DD_WIDTH;
-                        height = targetRect.bottom - targetRect.top;
+                        height = frRect.bottom - frRect.top;
                         lastLeft = left;
                     }
 
@@ -1171,7 +1209,7 @@ Ext.onReady(function () {
         return dragTargets[index];
     };
 
-    const ddColors = ['#00b4d8','#48cae4','#0096c7','#0077b6'];
+    const ddColors = ['#48cae4','#00b4d8','#0096c7','#0077b6'];
 
     const getDDTargetColor = function(index) {
         let lastIndex = 3;
