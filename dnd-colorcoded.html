@@ -6,13 +6,10 @@
     <link rel="stylesheet" type="text/css"
           href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/theme-crisp/resources/theme-crisp-all.css" />
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/ext-all.js"> </script>
-    <link rel="stylesheet" media="screen" href="dnd.css">
-    <script type="application/javascript" src="dnd.js"></script>
+    <link rel="stylesheet" media="screen" href="dnd-colorcoded.css">
+    <script type="application/javascript" src="dnd-colorcoded.js"></script>
     </head>
 <body>
-
-<!-- Drag and drop target (can float over any canvas element) -->
-<div class="dd-target"></div>
 
 
 <div class="barsContainer">
@@ -22,7 +19,7 @@
 
 <!-- Canvas parent -->
 
-<div class="canvas-parent" style="padding:15px;">
+<div class="canvas-parent">
 
 
 <!-- Flexbox groups-->
@@ -73,6 +70,49 @@
     </div>
 </div>
 <!-- End of canvas parent-->
+
+<!--Use this color as dd-target-zone base color: #00b4d822-->
+
+
+<div class="dd-target-zone"></div>
+
+<div class="dd-target-parent">
+    <div class="dd-target" style="width:30px;height:30px;top:600px"></div>
+    <div class="dd-target" style="width:30px;height:30px;top:600px"></div>
+    <div class="dd-target" style="width:30px;height:30px;top:600px"></div>
+    <div class="dd-target" style="width:30px;height:30px;top:600px"></div>
+</div>
+
+
+
+
+
+<!--<div draggable="true">-->
+<!--    <div style="position:absolute;top:114px;left:16px;height:396px;width:1505px;background:#0077b622"></div>-->
+<!--    <div style="position:absolute;top:114px;left:16px;height:12px;width:1505px;background:#0077b6bb"></div>-->
+<!--</div>-->
+<!--<div draggable="true">-->
+<!--    <div style="position:absolute;top:114px;left:16px;height:98px;width:702px;background:#0096c722"></div>-->
+<!--    <div style="position:absolute;top:126px;left:16px;height:12px;width:702px;background:#0096c7bb"></div>-->
+<!--</div>-->
+<!--<div draggable="true">-->
+<!--    <div style="position:absolute;top:126px;left:16px;height:96px;width:348px;background:#00b4d822"></div>-->
+<!--    <div style="position:absolute;top:138px;left:16px;height:12px;width:348px;background:#00b4d8bb"></div>-->
+<!--</div>-->
+<!--<div draggable="true">-->
+<!--    <div style="position:absolute;top:590px;left:830px;height:96px;width:348px;background:#48cae422"></div>-->
+<!--    <div style="position:absolute;top:590px;left:830px;height:12px;width:348px;background:#48cae4bb"></div>-->
+<!--</div>-->
+<!--<div draggable="true">-->
+<!--    <div style="position:absolute;top:590px;left:1040px;height:96px;width:348px;background:#00b4d822"></div>-->
+<!--    <div style="position:absolute;top:590px;left:1040px;height:12px;width:348px;background:#00b4d8bb"></div>-->
+<!--</div>-->
+<!--<div draggable="true">-->
+<!--    <div style="position:absolute;top:590px;left:1250px;height:96px;width:348px;background:#0096c722"></div>-->
+<!--    <div style="position:absolute;top:590px;left:1250px;height:12px;width:348px;background:#0096c7bb"></div>-->
+<!--</div>-->
+
+
 
 
 </body>

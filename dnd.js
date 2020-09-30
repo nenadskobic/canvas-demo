@@ -137,7 +137,6 @@ Ext.onReady(function () {
     const injectSelection = function(isCopyAction) {
 
 
-        //if (dragData.source.type === 'Button' || dragData.source.selectionSize === 1) {
         let el = dragData.target.el;
         let referencedChildIndex = dragData.target.between[0];
         let referencedChildNode = el.children[referencedChildIndex];
@@ -271,7 +270,6 @@ Ext.onReady(function () {
         for (let i = 0; i < newDraggableCells.length; i++) {
             if (newDraggableCells[i].classList.contains('frame-selected')) {
                 newDraggableCells[i].classList.remove('frame-selected');
-                //addToFrameSelection(newDraggableCells[i]);
             }
         }
 
