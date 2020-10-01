@@ -29,9 +29,20 @@ Ext.onReady(function () {
 
                             let groups = document.querySelectorAll('.row-group, .col-group');
 
+                            let randoms = [];
                             for (let i = 0; i < groups.length; i++) {
                                 if (state) {
-                                    let lightColor='hsl('+Math.floor(Math.random()*359)+',80%,85%)';
+                                    let nextR = Math.floor(Math.random()*18);
+                                    let nOfIterations = 0;
+                                    while (randoms.includes(nextR)) {
+                                        nextR = Math.floor(Math.random()*18);
+                                        ++nOfIterations;
+                                        if (nOfIterations > 18) {
+                                            randoms = [];
+                                        }
+                                    }
+                                    randoms.push(nextR);
+                                    let lightColor='hsl('+nextR*20+',80%,85%)';
                                     groups[i].style.background = lightColor;
                                 } else {
                                     groups[i].style.background = '#ffff';
