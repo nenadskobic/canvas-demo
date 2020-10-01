@@ -32,7 +32,12 @@ Ext.onReady(function () {
 
                             let randoms = [];
                             for (let i = 0; i < groups.length; i++) {
+                                let groupTargets = groups[i].querySelectorAll('.frame');
                                 if (state) {
+
+
+
+
                                     let nextR = Math.floor(Math.random()*18);
                                     let nOfIterations = 0;
                                     while (randoms.includes(nextR)) {
@@ -44,9 +49,14 @@ Ext.onReady(function () {
                                     }
                                     randoms.push(nextR);
                                     let lightColor='hsl('+nextR*20+',80%,85%)';
-                                    groups[i].style.background = lightColor;
+                                    for (let j = 0; j < groupTargets.length; j++) {
+                                        groupTargets[j].style.background = lightColor;
+                                    }
+
                                 } else {
-                                    groups[i].style.background = '#ffff';
+                                    for (let j = 0; j < groupTargets.length; j++) {
+                                        groupTargets[j].style.background = '#ffff';
+                                    }
                                 }
                             }
 
