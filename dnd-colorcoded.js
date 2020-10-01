@@ -23,7 +23,7 @@ Ext.onReady(function () {
                 }, '->',
                     {
                     xtype: 'button',
-                    text: 'Display groups',
+                    text: 'Show frame groups',
                     enableToggle: true,
                     listeners: {
                         toggle: function(thisCmp, state) {
@@ -62,7 +62,51 @@ Ext.onReady(function () {
 
                         }
                     }
-                },{
+                }, {
+                        xtype: 'button',
+                        text: 'Show flex wireframe',
+                        enableToggle: true,
+                        listeners: {
+                            toggle: function(thisCmp, state) {
+
+                                let groups = document.querySelectorAll('.row-group, .col-group');
+
+                                let randoms = [];
+                                for (let i = 0; i < groups.length; i++) {
+                                    let nextR = Math.floor(Math.random()*18);
+                                    let nOfIterations = 0;
+                                    while (randoms.includes(nextR)) {
+                                        nextR = Math.floor(Math.random()*18);
+                                        ++nOfIterations;
+                                        if (nOfIterations > 18) {
+                                            randoms = [];
+                                        }
+                                    }
+                                    randoms.push(nextR);
+                                    let lightColor='hsl('+nextR*20+',80%,85%)';
+                                    if (state) {
+                                        groups[i].style.padding = '8px';
+                                        groups[i].style.border = '1px dashed black';
+                                        groups[i].style.background = lightColor;
+                                        let children = groups[i].querySelectorAll('.frame');
+                                        for (let j = 0; j < children.length; j++) {
+                                            children[j].style.background = '#fff';
+                                        }
+
+                                    } else {
+                                        groups[i].style.padding = 0;
+                                        groups[i].style.border =  0;
+                                        groups[i].style.background = '#ffff';
+
+                                    }
+                                }
+
+                            }
+                        }
+                    },
+
+
+                    {
                     xtype: 'button',
                     text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'
                 },
