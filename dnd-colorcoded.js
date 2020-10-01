@@ -378,6 +378,18 @@ Ext.onReady(function () {
             }
         }
 
+        let targets = document.querySelectorAll('.dd-target');
+        for (let i = 0; i < targets.length; i++) {
+            targets[i].style.background = 'transparent';
+        }
+
+        this.style.background = ddColors[0];
+
+
+
+        //this.style.display = 'block';
+
+
         let dragData = getDragDataOnNormalIndex(targetIndex);
         if (dragDataList[0].target.direction === 'top' || dragDataList[0].target.direction === 'left') {
             dragData = getDragDataOnReversedIndex(targetIndex);
@@ -456,6 +468,8 @@ Ext.onReady(function () {
     }
     function ddTargetOnDragLeave(e) {
         --enteredZones;
+
+        this.style.background = 'transparent';
 
         switch (dragDataList[0].target.direction) {
             case 'top':
@@ -1041,7 +1055,13 @@ Ext.onReady(function () {
                         target.style.left = left;
                         target.style.width = width;
                         target.style.height = height;
-                        target.style.background = getDDTargetColor(zoneData.count - i - 1);
+                        //target.style.background = getDDTargetColor(zoneData.count - i - 1);
+
+                        //if (i > 0) {
+                            target.style.background = 'transparent';
+                        //} else {
+                        //    target.style.background = ddColors[0];
+                        //}
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
@@ -1087,7 +1107,13 @@ Ext.onReady(function () {
                         target.style.left = left;
                         target.style.width = width;
                         target.style.height = height;
-                        target.style.background = getDDTargetColor(i);
+                        //target.style.background = getDDTargetColor(i);
+
+                        //if (i < zoneData.count - 1) {
+                            target.style.background = 'transparent';
+                        //} else {
+                        //    target.style.background = ddColors[0];
+                        //}
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
@@ -1134,7 +1160,12 @@ Ext.onReady(function () {
                         target.style.left = left;
                         target.style.width = width;
                         target.style.height = height;
-                        target.style.background = getDDTargetColor(zoneData.count - i - 1);
+                        //target.style.background = getDDTargetColor(zoneData.count - i - 1);
+                        //if (i > 0) {
+                            target.style.background = 'transparent';
+                        //} else {
+                        //    target.style.background = ddColors[0];
+                        //}
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
@@ -1181,7 +1212,13 @@ Ext.onReady(function () {
                         target.style.left = left;
                         target.style.width = width;
                         target.style.height = height;
-                        target.style.background = getDDTargetColor(i);
+                        //target.style.background = getDDTargetColor(i);
+
+                        //if (i < zoneData.count - 1) {
+                            target.style.background = 'transparent';
+                        //} else {
+                        //    target.style.background = ddColors[0];
+                        //}
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
@@ -1480,7 +1517,7 @@ Ext.onReady(function () {
         return dragTargets[index];
     };
 
-    const ddColors = ['#48cae4','#00b4d8','#0096c7','#0077b6','#0096c7', '#00b4d8'];
+    const ddColors = ['#00b4d8','#00b4d8','#00b4d8','#00b4d8','#00b4d8', '#00b4d8']/*['#48cae4','#00b4d8','#0096c7','#0077b6','#0096c7', '#00b4d8']*/;
 
     const getDDTargetColor = function(index) {
 
