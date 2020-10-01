@@ -20,7 +20,8 @@ Ext.onReady(function () {
                     height: 48,
                     defaults: {focusCls: '', xtype: 'button'},
                     items: [{text: 'Report', cls: 'reportBtn', focusCls: '', height: 32}]
-                }, '->', {
+                }, '->',
+                    {
                     xtype: 'button',
                     text: 'Display groups',
                     enableToggle: true,
@@ -54,7 +55,24 @@ Ext.onReady(function () {
                 },{
                     xtype: 'button',
                     text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'
-                }]
+                },
+                    {
+                        xtype: 'numberfield',
+                        width: 120,
+                        fieldLabel: 'Gap size',
+                        labelWidth: 60,
+                        value: 6,
+                        listeners: {
+                            change: function(cmp, newValue) {
+                                console.log('change occured',cmp,newValue);
+                                let groups = document.querySelectorAll('.row-group, .col-group');
+
+                                for (let i = 0; i < groups.length; i++) {
+                                    groups[i].style.gap = newValue+'px';
+                                }
+                            }
+                        }
+                    },]
             })
         }, {title: 'Second Tab', disabled: true}]
     });
