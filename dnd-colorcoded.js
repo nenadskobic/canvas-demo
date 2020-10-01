@@ -599,6 +599,33 @@ Ext.onReady(function () {
 
     const getMinDstAndDirection = function(rect, e, insideFrame) {
 
+
+        let dstToTop = Math.abs(e.clientY - rect.top);
+        let dstToBottom = Math.abs(e.clientY - rect.bottom);
+        let dstToLeft = Math.abs(e.clientX - rect.left);
+        let dstToRight = Math.abs(e.clientX - rect.right);
+
+
+        let min = dstToTop;
+        let overDirection = 'top';
+
+        if (dstToBottom < min) {
+            min = dstToBottom;
+            overDirection = 'bottom';
+        }
+
+        if (dstToLeft < min) {
+            min = dstToLeft;
+            overDirection = 'left';
+        }
+
+        if (dstToRight < min) {
+            min = dstToRight;
+            overDirection = 'right';
+        }
+
+
+/*
         let centerX = (rect.left + rect.right) / 2;
         let centerY = (rect.top + rect.bottom) / 2;
 
@@ -613,7 +640,7 @@ Ext.onReady(function () {
 
         if (dstToBottomBorder < min) {min = dstToBottomBorder; overDirection = 'bottom';}
         if (dstToLeftBorder < min) {min = dstToLeftBorder; overDirection = 'left';}
-        if (dstToRightBorder < min) {min = dstToRightBorder; overDirection = 'right';}
+        if (dstToRightBorder < min) {min = dstToRightBorder; overDirection = 'right';}*/
 
         return {min, overDirection};
     };
