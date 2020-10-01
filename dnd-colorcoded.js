@@ -361,7 +361,7 @@ Ext.onReady(function () {
             processValidDrop(e);
             //alert('successfull drop to '+ e.target.className);
         }
-        if (e.target.classList.contains("start-dd-target")) {
+        if (e.target.classList.contains("start-dd-target") || e.target.parentNode.classList.contains("start-dd-target")) {
             processFirstDrop(e);
 
         }
@@ -1384,7 +1384,6 @@ Ext.onReady(function () {
     });
     startDDTarget.addEventListener('dragleave', function(e) {
         this.style.background = '#ffffffff';
-        startDDTarget.style.innerHTML = '<b>Drop report here to start...</b>';
     });
     startDDTarget.addEventListener('drop', ddTargetOnDrop);
     startDDTarget.addEventListener('dragover', ddTargetOnDragOver);
@@ -1392,7 +1391,6 @@ Ext.onReady(function () {
     if (draggableCells.length > 0) {
         startDDTarget.style.display = 'none';
         startDDTarget.style.background = '#ffffffff';
-        startDDTarget.style.innerHTML = '<b>Drop report here to start...</b>';
     }
 
     const processFirstDrop = function(e) {
@@ -1409,7 +1407,6 @@ Ext.onReady(function () {
 
         startDDTarget.style.display = 'none';
         startDDTarget.style.background = '#ffffffff';
-        startDDTarget.style.innerHTML = '<b>Drop report here to start...</b>';
 
     };
 
