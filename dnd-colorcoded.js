@@ -1,6 +1,52 @@
 Ext.onReady(function () {
 
-    let tPanel = Ext.create('Ext.tab.Panel', {renderTo: 'ribbonSimple', width: '100%',items: [{xtype: 'panel',title: 'Canvas',tbar: Ext.create('Ext.toolbar.Toolbar', {defaults: {focusCls: '',headerPosition: 'bottom'}, items: [{xtype: 'buttongroup',columns: 3,height: 48,defaults: {focusCls: '',xtype: 'button'},items: [{text: 'Save as',height: 32},{text: 'Close',height: 32}]},{xtype: 'buttongroup',columns: 3,height: 48,defaults: {focusCls: '',xtype: 'button'},items: [{text: 'Report',cls: 'reportBtn',focusCls: '',height: 32}]}, '->', {xtype: 'button',text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'}]})}, {title: 'Second Tab',disabled: true}]});
+    let tPanel = Ext.create('Ext.tab.Panel', {
+        renderTo: 'ribbonSimple',
+        width: '100%',
+        items: [{
+            xtype: 'panel',
+            title: 'Canvas',
+            tbar: Ext.create('Ext.toolbar.Toolbar', {
+                defaults: {focusCls: '', headerPosition: 'bottom'},
+                items: [{
+                    xtype: 'buttongroup',
+                    columns: 3,
+                    height: 48,
+                    defaults: {focusCls: '', xtype: 'button'},
+                    items: [{text: 'Save as', height: 32}, {text: 'Close', height: 32}]
+                }, {
+                    xtype: 'buttongroup',
+                    columns: 3,
+                    height: 48,
+                    defaults: {focusCls: '', xtype: 'button'},
+                    items: [{text: 'Report', cls: 'reportBtn', focusCls: '', height: 32}]
+                }, '->', {
+                    xtype: 'button',
+                    text: 'Display groups',
+                    enableToggle: true,
+                    listeners: {
+                        toggle: function(thisCmp, state) {
+
+                            let groups = document.querySelectorAll('.row-group, .col-group');
+
+                            for (let i = 0; i < groups.length; i++) {
+                                if (state) {
+                                    let lightColor='hsl('+Math.floor(Math.random()*359)+',80%,85%)';
+                                    groups[i].style.background = lightColor;
+                                } else {
+                                    groups[i].style.background = '#ffff';
+                                }
+                            }
+
+                        }
+                    }
+                },{
+                    xtype: 'button',
+                    text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'
+                }]
+            })
+        }, {title: 'Second Tab', disabled: true}]
+    });
 
     let btnContainer = tPanel.down('[text=Report]').container;
     btnContainer.set({ draggable: 'true' });
