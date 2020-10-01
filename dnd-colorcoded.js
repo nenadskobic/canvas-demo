@@ -1399,9 +1399,15 @@ Ext.onReady(function () {
         return dragTargets[index];
     };
 
-    const ddColors = ['#48cae4','#00b4d8','#0096c7','#0077b6'];
+    const ddColors = ['#48cae4','#00b4d8','#0096c7','#0077b6','#0096c7', '#00b4d8'];
 
     const getDDTargetColor = function(index) {
+
+        let colorIndex = index % 6;
+
+        return ddColors[colorIndex];
+
+
         let lastIndex = 3;
         let remainderWithThree = index % 3;
 
