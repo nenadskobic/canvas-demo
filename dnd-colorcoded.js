@@ -1,12 +1,13 @@
 Ext.onReady(function () {
 
-    let tPanel = Ext.create('Ext.tab.Panel', {renderTo: 'ribbonSimple',items: [{xtype: 'panel',title: 'Canvas',tbar: Ext.create('Ext.toolbar.Toolbar', {defaults: {focusCls: '',headerPosition: 'bottom'}, items: [{xtype: 'buttongroup',columns: 3,height: 48,defaults: {focusCls: '',xtype: 'button'},items: [{text: 'Save as',height: 32},{text: 'Close',height: 32}]},{xtype: 'buttongroup',columns: 3,height: 48,defaults: {focusCls: '',xtype: 'button'},items: [{text: 'Report',cls: 'reportBtn',focusCls: '',height: 32}]}, '->', {xtype: 'button',text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'}]})}, {title: 'Second Tab',disabled: true}]});
+    let tPanel = Ext.create('Ext.tab.Panel', {renderTo: 'ribbonSimple', width: '100%',items: [{xtype: 'panel',title: 'Canvas',tbar: Ext.create('Ext.toolbar.Toolbar', {defaults: {focusCls: '',headerPosition: 'bottom'}, items: [{xtype: 'buttongroup',columns: 3,height: 48,defaults: {focusCls: '',xtype: 'button'},items: [{text: 'Save as',height: 32},{text: 'Close',height: 32}]},{xtype: 'buttongroup',columns: 3,height: 48,defaults: {focusCls: '',xtype: 'button'},items: [{text: 'Report',cls: 'reportBtn',focusCls: '',height: 32}]}, '->', {xtype: 'button',text: 'Ctrl + click => Multiselekcija, Delete => Brisanje, Drag => Premjestanje, Alt + Drag => Kopiranje'}]})}, {title: 'Second Tab',disabled: true}]});
 
     let btnContainer = tPanel.down('[text=Report]').container;
     btnContainer.set({ draggable: 'true' });
 
     // Drag and drop data
     let dragDataList = [];
+    let dragSource = {};
 
     const getNewFrameNode = function(n) {
         const frameChild = document.createElement('div');
@@ -21,8 +22,8 @@ Ext.onReady(function () {
 
     const appendListenersToFrameNode = function(node) {
         node.addEventListener('dragstart', frameOnDragStart);
-        item.addEventListener('dragenter', frameOnDragEnter);
-        item.addEventListener('dragleave', frameOnDragLeave);
+        node.addEventListener('dragenter', frameOnDragEnter);
+        node.addEventListener('dragleave', frameOnDragLeave);
         node.addEventListener('dragend', frameOnDragEnd);
         node.addEventListener('click', frameOnClick);
     };
@@ -31,28 +32,70 @@ Ext.onReady(function () {
     const calcFrameName = function(selectionIndex, isCopyAction) {
         let frameName = newFrameName();
 
-        return frameName;
+        //return frameName;
 
-        /*if (dragDataList.source.type !== 'Button') {
+        if (dragSource.type !== 'Button') {
             const frameInnerText = selectedFrames[selectionIndex].children[0].innerText;
             frameName = isCopyAction ? frameInnerText.concat(' - Copy') : frameInnerText;
         }
-        return frameName;*/
+        return frameName;
     };
 
 
     const injectSelection = function(isCopyAction) {
 
+        let el = lastDragData.target.el;
+        let direction = lastDragData.target.direction;
+        let referencedChildNode = lastDragData.target.before;
 
-        /*let el = dragDataList.target.el;
-        let referencedChildIndex = dragDataList.target.between[0];
-        let referencedChildNode = el.children[referencedChildIndex];
+        console.log('direction and target');
+        console.log(el);
+        console.log(direction);
 
-        if (dragDataList.target.type === 'InBetween') {
+        let dragType = 'InBetween';
 
-            for (let i = 0; i < dragDataList.source.selectionSize; i++) {
+        if (el.classList.contains('frame')) {
+            dragType = 'SplitFrame';
+        }
+        else if (
+            (el.classList.contains('col-group') && (direction === 'left' || direction === 'right')) ||
+            (el.classList.contains('row-group') && (direction === 'top' || direction === 'bottom')))
+        {
+            dragType = 'NewDirection';
+        }
+        else if (!referencedChildNode &&
+            (
+                (el.classList.contains('col-group') && direction === 'top') ||
+                (el.classList.contains('row-group') && direction === 'left')
+            )
+        ) {
+            dragType = 'AtGroupStart';
+        }
+        else if (!referencedChildNode &&
+            (
+                (el.classList.contains('col-group') && direction === 'bottom') ||
+                (el.classList.contains('row-group') && direction === 'right')
+            )
+        ) {
+            dragType = 'AtGroupEnd'
+        }
+
+        if (dragType === 'AtGroupStart') {
+            for (let i = 0; i < dragSource.selectionSize; i++) {
+                let firstChild = el.children[0];
+                el.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), firstChild);
+            }
+        }
+        else if (dragType === 'AtGroupEnd') {
+            for (let i = 0; i < dragSource.selectionSize; i++) {
+                el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
+            }
+        }
+        else if (dragType === 'InBetween') {
+
+            for (let i = 0; i < dragSource.selectionSize; i++) {
                 // Add node at the end
-                if (referencedChildIndex >= el.children.length) {
+                if (!referencedChildNode) {
                     el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
                 }
                 // Insert before referenced child node
@@ -60,7 +103,7 @@ Ext.onReady(function () {
                     el.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), referencedChildNode);
                 }
             }
-        } else if (dragDataList.target.type === 'NewDirection') {
+        } else if (dragType === 'NewDirection') {
 
             let innerGroup;
 
@@ -88,29 +131,29 @@ Ext.onReady(function () {
                 }
                 el.appendChild(innerGroup);
 
-                for (let i = 0; i < dragDataList.source.selectionSize; i++) {
-                    if (dragDataList.target.direction === 'top' || dragDataList.target.direction === 'left') {
+                for (let i = 0; i < dragSource.selectionSize; i++) {
+                    if (direction === 'top' || direction === 'left') {
                         el.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), innerGroup);
                     } else {
                         el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
                     }
                 }
             } else {
-                for (let i = 0; i < dragDataList.source.selectionSize; i++) {
+                for (let i = 0; i < dragSource.selectionSize; i++) {
                     el.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
                 }
             }
-        } else if (dragDataList.target.type === 'SplitFrame') {
+        } else if (dragType === 'SplitFrame') {
 
-            if (dragDataList.target.direction === 'left' || dragDataList.target.direction === 'right') {
+            if (direction === 'left' || direction === 'right') {
                 let newGroup = document.createElement('div');
                 newGroup.className = 'row-group';
 
                 el.parentNode.insertBefore(newGroup, el);
                 newGroup.appendChild(el);
 
-                for (let i = 0; i < dragDataList.source.selectionSize; i++) {
-                    if (dragDataList.target.direction === 'left') {
+                for (let i = 0; i < dragSource.selectionSize; i++) {
+                    if (direction === 'left') {
                         newGroup.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), el);
                     } else {
                         newGroup.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
@@ -124,15 +167,15 @@ Ext.onReady(function () {
                 el.parentNode.insertBefore(newGroup, el);
                 newGroup.appendChild(el);
 
-                for (let i = 0; i < dragDataList.source.selectionSize; i++) {
-                    if (dragDataList.target.direction === 'left') {
+                for (let i = 0; i < dragSource.selectionSize; i++) {
+                    if (direction === 'left') {
                         newGroup.insertBefore(getNewFrameNode(calcFrameName(i, isCopyAction)), el);
                     } else {
                         newGroup.appendChild(getNewFrameNode(calcFrameName(i, isCopyAction)));
                     }
                 }
             }
-        }*/
+        }
 
     };
 
@@ -163,9 +206,9 @@ Ext.onReady(function () {
         }
         else {
             injectSelection(isCopyAction);
-            //if (dragDataList.source.type !== 'Button') {
-            //    deleteSelection();
-            //}
+            if (dragSource.type !== 'Button') {
+                deleteSelection();
+            }
 
         }
 
@@ -194,6 +237,8 @@ Ext.onReady(function () {
 
     let enteredZones = 0;
 
+    let lastDragData;
+
     function ddTargetOnDragEnter(e) {
         ++enteredZones;
         let targetIndex = -1;
@@ -208,6 +253,7 @@ Ext.onReady(function () {
         if (dragDataList[0].target.direction === 'top' || dragDataList[0].target.direction === 'left') {
             dragData = getDragDataOnReversedIndex(targetIndex);
         }
+        lastDragData = dragData;
 
         if (dragData && dragData.target) {
             let targetRect = dragData.target.el.getBoundingClientRect();
@@ -220,6 +266,7 @@ Ext.onReady(function () {
                     this._oldwidth = this.style.width;
                     this.style.left = targetRect.left;
                     this.style.width = targetRect.right - targetRect.left;
+
                     break;
                 case 'right':
                 case 'left':
@@ -233,11 +280,49 @@ Ext.onReady(function () {
             }
 
 
-            ddZone.style.top = targetRect.top + 2;
-            ddZone.style.left = targetRect.left + 2;
-            ddZone.style.width = targetRect.right - targetRect.left - 4;
-            ddZone.style.height = targetRect.bottom - targetRect.top - 4;
-            ddZone.style.outline = '2px solid ' + this.style.background
+            let ddTargetRect = this.getBoundingClientRect();
+
+            ddZone.style.top = targetRect.top;
+            ddZone.style.left = targetRect.left;
+            ddZone.style.width = targetRect.right - targetRect.left;
+            ddZone.style.height = targetRect.bottom - targetRect.top;
+            //ddZone.style.outline = '2px solid ' + this.style.background;
+
+
+            /*
+            switch (dragDataList[0].target.direction) {
+                case 'top':
+                    ddZoneDirection.style.top = targetRect.top;
+                    ddZoneDirection.style.left = targetRect.left;
+                    ddZoneDirection.style.width = targetRect.right - targetRect.left;
+                    ddZoneDirection.style.height = ddTargetRect.bottom - targetRect.top;
+                    break;
+                case 'bottom':
+                    ddZoneDirection.style.top = ddTargetRect.top;
+                    ddZoneDirection.style.left = targetRect.left;
+                    ddZoneDirection.style.width = targetRect.right - targetRect.left;
+                    ddZoneDirection.style.height = targetRect.bottom - ddTargetRect.top;
+                    break;
+                case 'right':
+                    ddZoneDirection.style.top = targetRect.top;
+                    ddZoneDirection.style.left = ddTargetRect.left;
+                    ddZoneDirection.style.width = targetRect.right - ddTargetRect.left;
+                    ddZoneDirection.style.height = targetRect.bottom - targetRect.top;
+                    break;
+                case 'left':
+                    ddZoneDirection.style.top = targetRect.top;
+                    ddZoneDirection.style.left = ddTargetRect.right;
+                    ddZoneDirection.style.width = ddTargetRect.right - targetRect.left;
+                    ddZoneDirection.style.height = targetRect.bottom - targetRect.top;
+
+                    break;
+                default:
+                    break;
+            }
+            ddZoneDirection.style.background = this.style.background;*/
+
+
+
         }
     }
     function ddTargetOnDragLeave(e) {
@@ -262,6 +347,7 @@ Ext.onReady(function () {
 
         if (enteredZones < 1) {
             ddZone.style.top = 0; ddZone.style.left = 0; ddZone.style.width = 0; ddZone.style.height = 0;
+            ddZoneDirection.style.top = 0; ddZoneDirection.style.left = 0; ddZoneDirection.style.width = 0; ddZoneDirection.style.height = 0;
         }
     }
 
@@ -275,7 +361,14 @@ Ext.onReady(function () {
             processValidDrop(e);
             //alert('successfull drop to '+ e.target.className);
         }
+        if (e.target.classList.contains("start-dd-target")) {
+            processFirstDrop(e);
+
+        }
+        ddZone.style.top = 0; ddZone.style.left = 0; ddZone.style.width = 0; ddZone.style.height = 0;
+        ddZoneDirection.style.top = 0; ddZoneDirection.style.left = 0; ddZoneDirection.style.width = 0; ddZoneDirection.style.height = 0;
         dragDataList = [];
+        enteredZones = 0;
     }
 
     /**
@@ -292,7 +385,7 @@ Ext.onReady(function () {
 
         for (let i = 0; i < newDraggableCells.length; i++) {
             if(newDraggableCells[i].classList.contains('frame-selected')) {
-                /*TODO prohibitedTargets.push(newDraggableCells[i]);*/
+                prohibitedTargets.push(newDraggableCells[i]);
             }
         }
 
@@ -313,7 +406,7 @@ Ext.onReady(function () {
             }
 
             if (prohibitedChildrenCount === nextParent.children.length && !prohibitedTargets.includes(nextParent)) {
-                /*TODO prohibitedTargets.push(nextParent);*/
+                prohibitedTargets.push(nextParent);
             }
 
         }
@@ -328,6 +421,7 @@ Ext.onReady(function () {
 
     function frameOnDragStart(e) {
 
+
         allAvailableFrames = canvasParent.querySelectorAll('.frame');
         addToFrameSelection(this);
 
@@ -339,10 +433,10 @@ Ext.onReady(function () {
 
         addProhibitedTargets();
 
-        /*dragDataList.source = {
+        dragSource = {
             type: 'Frame',
             selectionSize: selectedFrames.length
-        };*/
+        }
 
 
     }
@@ -413,6 +507,7 @@ Ext.onReady(function () {
 
 
     let ddZone = document.querySelector('.dd-target-zone');
+    let ddZoneDirection = document.querySelector('.dd-target-zone-direction-overlay');
 
 
     // TRACKING MECHANISM
@@ -529,6 +624,13 @@ Ext.onReady(function () {
         }
         // Traverse col or row groups in search for closest frame
         else {
+
+            for (let i = 0; i < dragTargets.length; i++) {
+                dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
+            }
+            return;
+            /* TODO playing around */
+
             let closestFrameAndDirection = traverseAndFindClosestFrame(target, e);
 
             closestFrame = closestFrameAndDirection.frame;
@@ -745,6 +847,8 @@ Ext.onReady(function () {
         let centerX = (frRect.right + frRect.left) /2;
         let centerY = (frRect.top + frRect.bottom) /2;
 
+        let onlyOneTargetPresent = zoneData.count === 1;
+
         switch(direction) {
             case 'top':
                 let lastBottom = 0;
@@ -759,7 +863,7 @@ Ext.onReady(function () {
                     } else if (i === 0 && zoneData.firstZoneType === 'edge') {
                         let dragData = getDragDataOnReversedIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = frRect.top - DD_HEIGHT;
+                        top = onlyOneTargetPresent ? frRect.top : frRect.top - DD_HEIGHT;
                         left = frRect.left;
                         width = frRect.right - frRect.left;
                         height = DD_HEIGHT;
@@ -804,7 +908,7 @@ Ext.onReady(function () {
                     } else if (i === zoneData.count - 1 && zoneData.firstZoneType === 'edge') {
                         let dragData = getDragDataOnNormalIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = frRect.bottom;
+                        top = onlyOneTargetPresent ? frRect.bottom - DD_HEIGHT: frRect.bottom;
                         left = frRect.left;
                         width = frRect.right - frRect.left;
                         height = DD_HEIGHT;
@@ -853,7 +957,7 @@ Ext.onReady(function () {
                         let dragData = getDragDataOnReversedIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
                         top = frRect.top;
-                        left = frRect.left - DD_WIDTH;
+                        left = onlyOneTargetPresent ? frRect.left: frRect.left - DD_WIDTH;
                         width = DD_WIDTH;
                         height = frRect.bottom - frRect.top;
                         lastRight = left + width;
@@ -900,7 +1004,7 @@ Ext.onReady(function () {
                         let dragData = getDragDataOnNormalIndex(i);
                         let targetRect = dragData.target.el.getBoundingClientRect();
                         top = frRect.top;
-                        left = frRect.right;
+                        left = onlyOneTargetPresent ? frRect.right - DD_WIDTH: frRect.right;
                         width = DD_WIDTH;
                         height = frRect.bottom - frRect.top;
                         lastLeft = left;
@@ -945,10 +1049,15 @@ Ext.onReady(function () {
     btnContainer.dom.addEventListener('dragstart', function(e){
         allAvailableFrames = canvasParent.querySelectorAll('.frame');
         this.style.opacity = '0.4';
-        /*dragDataList.source = {
+        dragSource = {
             type: 'Button',
             selectionSize: 1
-        };*/
+        };
+
+        /*if (allAvailableFrames.length === 0) {
+            startDDTarget.style.background = ddColors[1];
+        }*/
+
     });
     btnContainer.dom.addEventListener('drag', function(e){
 
@@ -958,6 +1067,11 @@ Ext.onReady(function () {
         for (let i = 0; i < dragTargets.length; i++) {
             dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
         }
+
+        /*if (allAvailableFrames.length === 0) {
+            startDDTarget.style.background = '#ffffffff';
+        }*/
+
     });
 
     let draggableCells = document.querySelectorAll('.frame');
@@ -1003,7 +1117,6 @@ Ext.onReady(function () {
     // HANDLE FRAME DELETION
     let deleteEmptyParent = function(nextParent) {
 
-
         if (!nextParent || nextParent.classList.contains('canvas-parent')) { return; }
 
         let parentNode = nextParent.parentNode;
@@ -1046,8 +1159,10 @@ Ext.onReady(function () {
             selectedFrames = [];
 
             newDraggableCells = document.querySelectorAll('.frame');
-            if (newDraggableCells.length <= 1) {
-                let newRoot = document.createElement('div');
+            if (newDraggableCells.length < 1) {
+
+                startDDTarget.style.display = 'block';
+                /*let newRoot = document.createElement('div');
                 newRoot.className = 'col-group';
 
                 if (newDraggableCells.length === 1) {
@@ -1057,7 +1172,7 @@ Ext.onReady(function () {
                 while (canvasParent.childNodes.length) {
                     canvasParent.removeChild(canvasParent.firstChild);
                 }
-                canvasParent.appendChild(newRoot);
+                canvasParent.appendChild(newRoot);*/
             }
         }
     });
@@ -1253,5 +1368,49 @@ Ext.onReady(function () {
 
 
     window.memoObjs = {sqrtMemo, sqrMemo};
+
+
+    let targetZoneColor = '#6ED3FF';
+
+
+    // Start dd target setup
+
+    let startDDTarget = document.querySelector('.start-dd-target');
+
+    //startDDTarget.addEventListener('dragover', ddTargetOnDragOver);
+    startDDTarget.addEventListener('dragenter', function(e) {
+        this.style.background = ddColors[0];
+        this.style.innerHTML = '';
+    });
+    startDDTarget.addEventListener('dragleave', function(e) {
+        this.style.background = '#ffffffff';
+        startDDTarget.style.innerHTML = '<b>Drop report here to start...</b>';
+    });
+    startDDTarget.addEventListener('drop', ddTargetOnDrop);
+    startDDTarget.addEventListener('dragover', ddTargetOnDragOver);
+
+    if (draggableCells.length > 0) {
+        startDDTarget.style.display = 'none';
+        startDDTarget.style.background = '#ffffffff';
+        startDDTarget.style.innerHTML = '<b>Drop report here to start...</b>';
+    }
+
+    const processFirstDrop = function(e) {
+
+        canvasParent.appendChild(getNewFrameNode(calcFrameName(0, false)));
+
+        let newDraggableCells = document.querySelectorAll('.frame');
+
+        for (let i = 0; i < newDraggableCells.length; i++) {
+            if (newDraggableCells[i].classList.contains('frame-selected')) {
+                newDraggableCells[i].classList.remove('frame-selected');
+            }
+        }
+
+        startDDTarget.style.display = 'none';
+        startDDTarget.style.background = '#ffffffff';
+        startDDTarget.style.innerHTML = '<b>Drop report here to start...</b>';
+
+    };
 
 });
