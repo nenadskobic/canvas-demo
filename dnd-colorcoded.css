@@ -9,10 +9,10 @@
 
 .canvas-parent {
     /*border: 2px solid #232596;*/
-    padding: 15px;
+    padding: 10px 20px 20px 20px;
 }
 
-.dd-target, .dd-target-zone, .dd-target-zone-direction-overlay {
+.dd-target, .dd-target-zone, .dd-target-underlay {
     position: absolute;
     width: 0;
     height: 0;
@@ -20,8 +20,12 @@
     left: 0;
 }
 
+.dd-target-underlay {
+    background: #03a9f4;
+}
+
 .dd-target-zone {
-    background: rgba(110, 211, 255, 0.15);
+    background: #03a9f41f;
     /*outline: 2px solid #0077b6;*/
 }
 
@@ -40,7 +44,7 @@
     flex-grow: 1;
     /*padding: 12px;*/
     /*border: 1px dashed black;*/
-    gap: 6px;
+    gap: 12px;
 }
 
 .col-group:hover {

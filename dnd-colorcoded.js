@@ -115,7 +115,7 @@ Ext.onReady(function () {
                         width: 120,
                         fieldLabel: 'Gap size',
                         labelWidth: 60,
-                        value: 6,
+                        value: 12,
                         listeners: {
                             change: function(cmp, newValue) {
                                 console.log('change occured',cmp,newValue);
@@ -357,10 +357,97 @@ Ext.onReady(function () {
     };
 
 
+
+    //xxxxxxxxxxxxxxxxxxx
+    let ddTargetUnderlay = document.querySelector('.dd-target-underlay');
+
     function ddTargetOnDragOver(e) {
-       if(e.preventDefault) {
+
+        if(e.preventDefault) {
             e.preventDefault();
         }
+
+         // Targeting step by step
+
+
+        let totalSteps = 0;
+        let thisRect = this.getBoundingClientRect();
+
+        switch (currentDragTargetData.directions[0]) {
+            case 'top':
+            case 'bottom':
+                totalSteps = Math.floor(Math.abs(e.clientY - thisRect.top) / currentDragTargetData.stepSize);
+                break;
+            case 'left':
+            case 'right':
+                totalSteps = Math.floor(Math.abs(e.clientX - thisRect.left) / currentDragTargetData.stepSize);
+                break;
+        }
+
+
+        let targetIndex = totalSteps, dragData;
+
+        if (!dragDataList[0]) {
+            return;
+        }
+
+        if (dragDataList[0].target.direction === 'top' || dragDataList[0].target.direction === 'left') {
+            dragData = getDragDataOnReversedIndex(targetIndex);
+        } else {
+            dragData = getDragDataOnNormalIndex(targetIndex);
+        }
+        lastDragData = dragData;
+
+        if (dragData && dragData.target) {
+            let targetRect = dragData.target.el.getBoundingClientRect();
+
+
+            switch (dragDataList[0].target.direction) {
+                case 'top':
+                case 'bottom':
+
+                    let maxTop = thisRect.bottom - DD_HEIGHT;
+                    let calculatedTop = thisRect.top + totalSteps * currentDragTargetData.stepSize;
+
+                    ddTargetUnderlay.style.top = calculatedTop < maxTop ? calculatedTop : maxTop;
+                    ddTargetUnderlay.style.left = targetRect.left;
+                    ddTargetUnderlay.style.width = targetRect.right - targetRect.left;
+                    ddTargetUnderlay.style.height = DD_HEIGHT;
+                    break;
+                case 'right':
+                case 'left':
+
+                    let maxLeft = thisRect.right - DD_WIDTH;
+                    let calculatedLeft = thisRect.left + totalSteps * currentDragTargetData.stepSize;
+
+                    ddTargetUnderlay.style.top = targetRect.top;
+                    ddTargetUnderlay.style.left = calculatedLeft < maxLeft ? calculatedLeft : maxLeft;
+                    ddTargetUnderlay.style.width = DD_WIDTH;
+                    ddTargetUnderlay.style.height = targetRect.bottom - targetRect.top;
+                    break;
+                default:
+                    break;
+            }
+
+            ddZone.style.top = targetRect.top;
+            ddZone.style.left = targetRect.left;
+            ddZone.style.width = targetRect.right - targetRect.left;
+            ddZone.style.height = targetRect.bottom - targetRect.top;
+
+
+            if (dragData.target.el.classList.contains('frame') && allAvailableFrames.length > 1) {
+                ddZone.style.background = targetZoneColorGreen;
+                ddTargetUnderlay.style.background = underlayColorGreen;
+            } else {
+                ddZone.style.background = targetZoneColorBlue;
+                ddTargetUnderlay.style.background = underlayColorBlue;
+            }
+
+        }
+
+
+
+
         return false;
     }
 
@@ -369,6 +456,7 @@ Ext.onReady(function () {
     let lastDragData;
 
     function ddTargetOnDragEnter(e) {
+        return;
         ++enteredZones;
         let targetIndex = -1;
         for (let i = 0; i < dragTargets.length; i++) {
@@ -390,10 +478,11 @@ Ext.onReady(function () {
         //this.style.display = 'block';
 
 
-        let dragData = getDragDataOnNormalIndex(targetIndex);
-        if (dragDataList[0].target.direction === 'top' || dragDataList[0].target.direction === 'left') {
+        let dragData = getDragDataOnReversedIndex(targetIndex);
+        //let dragData = getDragDataOnNormalIndex(targetIndex);
+        /*if (dragDataList[0].target.direction === 'top' || dragDataList[0].target.direction === 'left') {
             dragData = getDragDataOnReversedIndex(targetIndex);
-        }
+        }*/
         lastDragData = dragData;
 
         if (dragData && dragData.target) {
@@ -403,7 +492,9 @@ Ext.onReady(function () {
             switch (dragDataList[0].target.direction) {
                 case 'top':
                 case 'bottom':
+                    this._oldtop = this.style.top;
                     this._oldleft = this.style.left;
+                    this._oldheight = this.style.height;
                     this._oldwidth = this.style.width;
                     this.style.left = targetRect.left;
                     this.style.width = targetRect.right - targetRect.left;
@@ -412,7 +503,9 @@ Ext.onReady(function () {
                 case 'right':
                 case 'left':
                     this._oldtop = this.style.top;
+                    this._oldleft = this.style.left;
                     this._oldheight = this.style.height;
+                    this._oldwidth = this.style.width;
                     this.style.top = targetRect.top;
                     this.style.height = targetRect.bottom - targetRect.top;
                     break;
@@ -420,67 +513,38 @@ Ext.onReady(function () {
                     break;
             }
 
-
-            let ddTargetRect = this.getBoundingClientRect();
-
             ddZone.style.top = targetRect.top;
             ddZone.style.left = targetRect.left;
             ddZone.style.width = targetRect.right - targetRect.left;
             ddZone.style.height = targetRect.bottom - targetRect.top;
-            //ddZone.style.outline = '2px solid ' + this.style.background;
-
-
-            /*
-            switch (dragDataList[0].target.direction) {
-                case 'top':
-                    ddZoneDirection.style.top = targetRect.top;
-                    ddZoneDirection.style.left = targetRect.left;
-                    ddZoneDirection.style.width = targetRect.right - targetRect.left;
-                    ddZoneDirection.style.height = ddTargetRect.bottom - targetRect.top;
-                    break;
-                case 'bottom':
-                    ddZoneDirection.style.top = ddTargetRect.top;
-                    ddZoneDirection.style.left = targetRect.left;
-                    ddZoneDirection.style.width = targetRect.right - targetRect.left;
-                    ddZoneDirection.style.height = targetRect.bottom - ddTargetRect.top;
-                    break;
-                case 'right':
-                    ddZoneDirection.style.top = targetRect.top;
-                    ddZoneDirection.style.left = ddTargetRect.left;
-                    ddZoneDirection.style.width = targetRect.right - ddTargetRect.left;
-                    ddZoneDirection.style.height = targetRect.bottom - targetRect.top;
-                    break;
-                case 'left':
-                    ddZoneDirection.style.top = targetRect.top;
-                    ddZoneDirection.style.left = ddTargetRect.right;
-                    ddZoneDirection.style.width = ddTargetRect.right - targetRect.left;
-                    ddZoneDirection.style.height = targetRect.bottom - targetRect.top;
-
-                    break;
-                default:
-                    break;
-            }
-            ddZoneDirection.style.background = this.style.background;*/
-
-
-
         }
     }
     function ddTargetOnDragLeave(e) {
+
+
+        ddTargetUnderlay.style.top = 0; ddTargetUnderlay.style.left = 0; ddTargetUnderlay.style.width = 0; ddTargetUnderlay.style.height = 0;
+        ddZone.style.top = 0; ddZone.style.left = 0; ddZone.style.width = 0; ddZone.style.height = 0;
+        return;
+
+
+        // OLD
+
         --enteredZones;
 
-        this.style.background = 'transparent';
+        if (!isInsideFrame) {
+            this.style.background = 'transparent';
+        }
 
         switch (dragDataList[0].target.direction) {
             case 'top':
             case 'bottom':
                 if (this._oldleft) {this.style.left = this._oldleft;}
-                if (this._oldwidth) {this.style.width = this._oldwidth;}
+                //if (this._oldwidth) {this.style.width = this._oldwidth;}
                 break;
             case 'right':
             case 'left':
                 if (this._oldtop) {this.style.top = this._oldtop;}
-                if (this._oldheight) {this.style.height = this._oldheight;}
+                //if (this._oldheight) {this.style.height = this._oldheight;}
                 break;
             default:
                 break;
@@ -490,7 +554,6 @@ Ext.onReady(function () {
 
         if (enteredZones < 1) {
             ddZone.style.top = 0; ddZone.style.left = 0; ddZone.style.width = 0; ddZone.style.height = 0;
-            ddZoneDirection.style.top = 0; ddZoneDirection.style.left = 0; ddZoneDirection.style.width = 0; ddZoneDirection.style.height = 0;
         }
     }
 
@@ -509,7 +572,7 @@ Ext.onReady(function () {
 
         }
         ddZone.style.top = 0; ddZone.style.left = 0; ddZone.style.width = 0; ddZone.style.height = 0;
-        ddZoneDirection.style.top = 0; ddZoneDirection.style.left = 0; ddZoneDirection.style.width = 0; ddZoneDirection.style.height = 0;
+        ddTargetUnderlay.style.top = 0; ddTargetUnderlay.style.left = 0; ddTargetUnderlay.style.width = 0; ddTargetUnderlay.style.height = 0;
         dragDataList = [];
         enteredZones = 0;
     }
@@ -650,7 +713,6 @@ Ext.onReady(function () {
 
 
     let ddZone = document.querySelector('.dd-target-zone');
-    let ddZoneDirection = document.querySelector('.dd-target-zone-direction-overlay');
 
 
     // TRACKING MECHANISM
@@ -681,46 +743,45 @@ Ext.onReady(function () {
             min = dstToRight;
             overDirection = 'right';
         }
-
-
-/*
-        let centerX = (rect.left + rect.right) / 2;
-        let centerY = (rect.top + rect.bottom) / 2;
-
-        let dstToTopBorder = sqrt(sqr(Math.abs(e.clientX - centerX)) + sqr(Math.abs(e.clientY - rect.top)));
-        let dstToBottomBorder = sqrt(sqr(Math.abs(e.clientX - centerX)) + sqr(Math.abs(e.clientY - rect.bottom)));
-        let dstToLeftBorder = sqrt(sqr(Math.abs(e.clientX - rect.left)) + sqr(Math.abs(e.clientY - centerY)));
-        let dstToRightBorder = sqrt(sqr(Math.abs(e.clientX - rect.right)) + sqr(Math.abs(e.clientY - centerY)));
-
-
-        let min = dstToTopBorder;
-        let overDirection = 'top';
-
-        if (dstToBottomBorder < min) {min = dstToBottomBorder; overDirection = 'bottom';}
-        if (dstToLeftBorder < min) {min = dstToLeftBorder; overDirection = 'left';}
-        if (dstToRightBorder < min) {min = dstToRightBorder; overDirection = 'right';}*/
-
         return {min, overDirection};
     };
 
+    const minDistanceToFrame = function(frRect, e) {
+
+        let dstToTopLeft = sqrt(sqr(Math.abs(e.clientX - frRect.left))+sqr(Math.abs(e.clientY - frRect.top)));
+        let dstToBottomLeft = sqrt(sqr(Math.abs(e.clientX - frRect.left))+sqr(Math.abs(e.clientY - frRect.bottom)));
+        let dstToTopRight = sqrt(sqr(Math.abs(e.clientX - frRect.right))+sqr(Math.abs(e.clientY - frRect.top)));
+        let dstToBottomRight = sqrt(sqr(Math.abs(e.clientX - frRect.right))+sqr(Math.abs(e.clientY - frRect.bottom)));
+
+        let min = dstToTopLeft;
+
+        if (dstToBottomLeft < min) { min = dstToBottomLeft; }
+        if (dstToTopRight < min) { min = dstToTopRight; }
+        if (dstToBottomRight < min) { min = dstToBottomRight; }
+
+        return min;
+
+    };
+
     const traverseAndFindClosestFrame = function(target, e) {
-        let minDst = 10000, frame = null, overDirection = null;
+        let minDst = 10000, frame = allAvailableFrames[0], overDirection = null;
 
         for (let i = 0; i < allAvailableFrames.length; i++) {
-            let minDstAndDirection = getMinDstAndDirection(allAvailableFrames[i].getBoundingClientRect(), e, false);
 
-            let currentMin = minDstAndDirection.min;
+            let currentMin = minDistanceToFrame(allAvailableFrames[i].getBoundingClientRect(), e);
 
             if (currentMin < minDst) {
                 minDst = currentMin;
-                overDirection = minDstAndDirection.overDirection;
                 frame = allAvailableFrames[i];
             }
         }
-        return {frame, overDirection};
+
+        let minDstAndDirection = getMinDstAndDirection(frame.getBoundingClientRect(), e, false);
+
+        return {frame, overDirection: minDstAndDirection.overDirection};
     };
 
-    const DD_WIDTH = 12, DD_HEIGHT = 12;
+    const DD_WIDTH = 14, DD_HEIGHT = 14;
 
     const frameOnDragEnter = function(e) {};
     const frameOnDragLeave = function(e) {};
@@ -739,6 +800,9 @@ Ext.onReady(function () {
     let lastClosestFrame, lastDirection, lastClientX, lastClientY;
 
 
+    let isInsideFrame = false;
+
+    //xxxxxxxxxxxxxxxxxxxxxx
     const canvasParentOnDragOver = function(e) {
 
         let target = e.target;
@@ -788,6 +852,8 @@ Ext.onReady(function () {
         // Find nearest track point inside a frame
         if (target.classList.contains('frame')) {
 
+            isInsideFrame = true;
+
             closestFrame = getFrameParentNode(target);
             overDirection = getMinDstAndDirection(closestFrame.getBoundingClientRect(), e, true).overDirection;
 
@@ -795,16 +861,21 @@ Ext.onReady(function () {
         // Traverse col or row groups in search for closest frame
         else {
 
-            for (let i = 0; i < dragTargets.length; i++) {
-                dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
-            }
-            return;
-            /* TODO playing around */
+            isInsideFrame = false;
 
             let closestFrameAndDirection = traverseAndFindClosestFrame(target, e);
 
             closestFrame = closestFrameAndDirection.frame;
             overDirection = closestFrameAndDirection.overDirection;
+
+
+            //for (let i = 0; i < dragTargets.length; i++) {
+            //   dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
+            // }
+            //return;
+            /* TODO playing around */
+
+
 
         }
 
@@ -822,7 +893,7 @@ Ext.onReady(function () {
        // } else {
        //     lastClosestFrame = closestFrame;
         //    lastDirection = overDirection;
-            setTargetPositions(closestFrame, overDirection);
+            setTargetPositions(closestFrame, overDirection, e);
       //  }
 
     };
@@ -1007,9 +1078,15 @@ Ext.onReady(function () {
 
     };
 
-    const setTargetPositions = function(closestFrame, direction) {
+//xxxxxxxxxxxxxxxxxx
+    let currentDragTargetData = {targets: [], closestXorYs: [], directions: [], stepSize: DD_WIDTH};
+
+
+    const setTargetPositions = function(closestFrame, direction, e) {
 
         dragDataList = [];
+        currentDragTargetData = {targets: [], closestXorYs: [], directions: [], stepSize: DD_WIDTH};
+
         let zoneData = countFrameDDZonesForDirection(closestFrame, direction, 0);
 
         let frRect = closestFrame.getBoundingClientRect();
@@ -1018,215 +1095,273 @@ Ext.onReady(function () {
         let centerY = (frRect.top + frRect.bottom) /2;
 
         let onlyOneTargetPresent = zoneData.count === 1;
+        let nOfTargets = zoneData.count;//zoneData.count < 2 ? zoneData.count : 2;
+        let lastIndexOnReverseSide = 0;//zoneData.count < 2 ? 0 : zoneData.count - 2;
+
+        let target = getDragTarget(0);
+        let top, left, width, height;
 
         switch(direction) {
             case 'top':
-                let lastBottom = 0;
-                for (let i = 0; i < zoneData.count; i++) {
-                    let top, left, width, height;
-                    if (i === 0 && zoneData.firstZoneType === 'gap') {
-                        top = zoneData.gapRect.top;
-                        left = frRect.left;
-                        width = frRect.right - frRect.left;
-                        height = zoneData.gapRect.height;
-                        lastBottom = top + height;
-                    } else if (i === 0 && zoneData.firstZoneType === 'edge') {
-                        let dragData = getDragDataOnReversedIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = onlyOneTargetPresent ? frRect.top : frRect.top - DD_HEIGHT;
-                        left = frRect.left;
-                        width = frRect.right - frRect.left;
-                        height = DD_HEIGHT;
-                        lastBottom = top + height;
+                if (zoneData.firstZoneType === 'gap') {
 
-                    } else {
-                        let dragData = getDragDataOnReversedIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = lastBottom;
-                        left = frRect.left;
-                        width = frRect.right - frRect.left;
-                        height = DD_HEIGHT;
-                        lastBottom = top + height;
-                    }
+                    top = zoneData.gapRect.top;
+                    left = frRect.left;
+                    width = frRect.right - frRect.left;
+                    height = Math.abs(zoneData.gapRect.top - frRect.top) + DD_HEIGHT;
 
-                    let target = getDragTarget(i);
-                    if (lastBottom <= centerY) {
-                        target.style.top = top;
-                        target.style.left = left;
-                        target.style.width = width;
-                        target.style.height = height;
-                        //target.style.background = getDDTargetColor(zoneData.count - i - 1);
+                    if (top + height <= centerY) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
 
-                        //if (i > 0) {
-                            target.style.background = 'transparent';
-                        //} else {
-                        //    target.style.background = ddColors[0];
-                        //}
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('top');
+                        currentDragTargetData.stepSize =  height / zoneData.count;
+
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
                     }
-                }
-                for (let i = zoneData.count; i < dragTargets.length; i++) {
-                    dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
+
+
+                } else if (onlyOneTargetPresent) {
+
+                    top = frRect.top - DD_HEIGHT;
+                    left = frRect.left;
+                    width = frRect.right - frRect.left;
+                    height = DD_HEIGHT;
+
+                    if (top + height <= centerY) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('top');
+                        currentDragTargetData.stepSize =  height / zoneData.count;
+
+                    } else {
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
+                    }
+
+                } else { // Default
+
+                    top = frRect.top - DD_HEIGHT;
+                    left = frRect.left;
+                    width = frRect.right - frRect.left;
+                    height = DD_HEIGHT * 2;
+
+                    if (top + height <= centerY) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('top');
+                        currentDragTargetData.stepSize =  height / zoneData.count;
+
+                    } else {
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
+                    }
+
                 }
                 break;
             case 'bottom':
-                let lastTop = 0;
-                for (let i = zoneData.count - 1; i >= 0 ; i--) {
-                    let top, left, width, height;
-                    if (i === zoneData.count - 1 && zoneData.firstZoneType === 'gap') {
-                        top = zoneData.gapRect.top;
-                        left = frRect.left;
-                        width = frRect.right - frRect.left;
-                        height = zoneData.gapRect.height;
-                        lastTop = top;
-                    } else if (i === zoneData.count - 1 && zoneData.firstZoneType === 'edge') {
-                        let dragData = getDragDataOnNormalIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = onlyOneTargetPresent ? frRect.bottom - DD_HEIGHT: frRect.bottom;
-                        left = frRect.left;
-                        width = frRect.right - frRect.left;
-                        height = DD_HEIGHT;
-                        lastTop = top;
 
-                    } else {
-                        let dragData = getDragDataOnNormalIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = lastTop - DD_HEIGHT;
-                        left = frRect.left;
-                        width = frRect.right - frRect.left;
-                        height = DD_HEIGHT;
-                        lastTop = top;
-                    }
+                if (zoneData.firstZoneType === 'gap') {
 
 
-                    let target = getDragTarget(i);
-                    if (lastTop >= centerY) {
-                        target.style.top = top;
-                        target.style.left = left;
-                        target.style.width = width;
-                        target.style.height = height;
-                        //target.style.background = getDDTargetColor(i);
+                    height = Math.abs(zoneData.gapRect.top + zoneData.gapRect.height - frRect.bottom) + DD_HEIGHT;
+                    top = zoneData.gapRect.top + zoneData.gapRect.height - height;
+                    left = frRect.left;
+                    width = frRect.right - frRect.left;
 
-                        //if (i < zoneData.count - 1) {
-                            target.style.background = 'transparent';
-                        //} else {
-                        //    target.style.background = ddColors[0];
-                        //}
+                    console.log(zoneData,height,top,left,width);
+
+                    if (top >= centerY) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('bottom');
+                        currentDragTargetData.stepSize =  height / zoneData.count;
+
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
                     }
 
-                }
 
-                for (let i = zoneData.count; i < dragTargets.length; i++) {
-                    dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
+                } else if (onlyOneTargetPresent) {
+                    console.log(1175);
+                    top = frRect.bottom;
+                    left = frRect.left;
+                    width = frRect.right - frRect.left;
+                    height = DD_HEIGHT;
+
+                    if (top >= centerY) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('bottom');
+                        currentDragTargetData.stepSize =  height / zoneData.count;
+
+                    } else {
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
+                    }
+
+                } else { // Default
+                    console.log(1195);
+                    top = frRect.bottom - DD_HEIGHT;
+                    left = frRect.left;
+                    width = frRect.right - frRect.left;
+                    height = DD_HEIGHT * 2;
+
+                    if (top >= centerY) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('bottom');
+                        currentDragTargetData.stepSize =  height / zoneData.count;
+
+                    } else {
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
+                    }
                 }
                 break;
             case 'left':
-                let lastRight = 0;
-                for (let i = 0; i < zoneData.count; i++) {
-                    let top, left, width, height;
-                    if (i === 0 && zoneData.firstZoneType === 'gap') {
-                        top = frRect.top;
-                        left = zoneData.gapRect.left;
-                        width = zoneData.gapRect.width;
-                        height = frRect.bottom - frRect.top;
-                        lastRight = left + width;
-                    } else if (i === 0 && zoneData.firstZoneType === 'edge') {
-                        let dragData = getDragDataOnReversedIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = frRect.top;
-                        left = onlyOneTargetPresent ? frRect.left: frRect.left - DD_WIDTH;
-                        width = DD_WIDTH;
-                        height = frRect.bottom - frRect.top;
-                        lastRight = left + width;
 
-                    } else {
-                        let dragData = getDragDataOnReversedIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = frRect.top;
-                        left = lastRight;
-                        width = DD_WIDTH;
-                        height = frRect.bottom - frRect.top;
-                        lastRight = left + width;
-                    }
 
-                    let target = getDragTarget(i);
-                    if (lastRight <= centerX) {
-                        target.style.top = top;
-                        target.style.left = left;
-                        target.style.width = width;
-                        target.style.height = height;
-                        //target.style.background = getDDTargetColor(zoneData.count - i - 1);
-                        //if (i > 0) {
-                            target.style.background = 'transparent';
-                        //} else {
-                        //    target.style.background = ddColors[0];
-                        //}
+                if (zoneData.firstZoneType === 'gap') {
+
+                    top = frRect.top;
+                    width = Math.abs(zoneData.gapRect.left - frRect.left) + DD_WIDTH;
+                    left = zoneData.gapRect.left;
+                    height = frRect.bottom - frRect.top;
+
+                    if (left + width <= centerX) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('left');
+                        currentDragTargetData.stepSize =  width / zoneData.count;
+
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
                     }
-                }
-                for (let i = zoneData.count; i < dragTargets.length; i++) {
-                    dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
+
+
+                } else if (onlyOneTargetPresent) {
+
+                    top = frRect.top;
+                    left = frRect.left - DD_WIDTH;
+                    width = DD_WIDTH;
+                    height = frRect.bottom - frRect.top;
+
+                    if (left + width <= centerX) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('left');
+                        currentDragTargetData.stepSize =  width / zoneData.count;
+
+                    } else {
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
+                    }
+
+                } else { // Default
+
+                    top = frRect.top;
+                    width = 2 * DD_WIDTH;
+                    left = frRect.left - DD_WIDTH;
+                    height = frRect.bottom - frRect.top;
+
+                    if (left + width <= centerX) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('left');
+                        currentDragTargetData.stepSize =  width / zoneData.count;
+
+                    } else {
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
+                    }
                 }
 
                 break;
             case 'right':
-                let lastLeft = 0;
+                if (zoneData.firstZoneType === 'gap') {
 
-                for (let i = zoneData.count - 1; i >= 0; i--) {
-                    let top, left, width, height;
-                    if (i === zoneData.count - 1 && zoneData.firstZoneType === 'gap') {
-                        top = frRect.top;
-                        left = zoneData.gapRect.left;
-                        width = zoneData.gapRect.width;
-                        height = frRect.bottom - frRect.top;
-                        lastLeft = left;
-                    } else if (i === zoneData.count - 1 && zoneData.firstZoneType === 'edge') {
-                        let dragData = getDragDataOnNormalIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = frRect.top;
-                        left = onlyOneTargetPresent ? frRect.right - DD_WIDTH: frRect.right;
-                        width = DD_WIDTH;
-                        height = frRect.bottom - frRect.top;
-                        lastLeft = left;
+                    top = frRect.top;
+                    width = Math.abs(zoneData.gapRect.left + zoneData.gapRect.width - frRect.right) + DD_WIDTH;
+                    left = zoneData.gapRect.left + zoneData.gapRect.width - width;
+                    height = frRect.bottom - frRect.top;
+
+                    if (left >= centerX) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('right');
+                        currentDragTargetData.stepSize =  width / zoneData.count;
 
                     } else {
-                        let dragData = getDragDataOnNormalIndex(i);
-                        let targetRect = dragData.target.el.getBoundingClientRect();
-                        top = frRect.top;
-                        left = lastLeft - DD_WIDTH;
-                        width = DD_WIDTH;
-                        height = frRect.bottom - frRect.top;
-                        lastLeft = left;
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
                     }
 
-                    let target = getDragTarget(i);
-                    if (lastLeft >= centerX) {
-                        target.style.top = top;
-                        target.style.left = left;
-                        target.style.width = width;
-                        target.style.height = height;
-                        //target.style.background = getDDTargetColor(i);
 
-                        //if (i < zoneData.count - 1) {
-                            target.style.background = 'transparent';
-                        //} else {
-                        //    target.style.background = ddColors[0];
-                        //}
+                } else if (onlyOneTargetPresent) {
+
+                    top = frRect.top;
+                    left = frRect.right;
+                    width = DD_WIDTH;
+                    height = frRect.bottom - frRect.top;
+
+                    if (left >= centerX) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('right');
+                        currentDragTargetData.stepSize =  width / zoneData.count;
+
+                    } else {
+                        // There is no space available for this drag target
+                        target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
+                    }
+
+                } else { // Default
+
+                    top = frRect.top;
+                    width = 2 * DD_WIDTH;
+                    left = frRect.right - DD_WIDTH;
+                    height = frRect.bottom - frRect.top;
+
+                    if (left >= centerX) {
+                        target.style.top = top; target.style.left = left; target.style.width = width; target.style.height = height; target.style.background = 'transparent';
+
+                        currentDragTargetData.targets.push(target);
+                        currentDragTargetData.closestXorYs.push(1);
+                        currentDragTargetData.directions.push('right');
+                        currentDragTargetData.stepSize =  width / zoneData.count;
+
                     } else {
                         // There is no space available for this drag target
                         target.style.top = 0; target.style.left = 0; target.style.width = 0; target.style.height = 0;
                     }
                 }
-                for (let i = zoneData.count; i < dragTargets.length; i++) {
-                    dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
-                }
+
                 break;
             default:
                 for (let i = 0; i < dragTargets.length; i++) {
@@ -1234,6 +1369,28 @@ Ext.onReady(function () {
                 }
                 break;
         }
+
+        //let minDst = 10000, closestDDTarget;
+
+       /* for (let i = 0; i < currentDragTargetData.targets.length; i++) {
+            let direction = currentDragTargetData.directions[i];
+
+            let dst;
+            if (direction === 'top' || direction === 'bottom') {
+                dst = Math.abs(e.clientY - currentDragTargetData.closestXorYs[i]);
+            } else {
+                dst = Math.abs(e.clientX - currentDragTargetData.closestXorYs[i]);
+            }
+
+            if (dst < minDst) {
+                minDst = dst;
+                closestDDTarget = currentDragTargetData.targets[i];
+            }
+        }*/
+
+        /*closestDDTarget.style.background = getDDTargetColor(0);*/
+
+
     };
 
 
@@ -1501,6 +1658,7 @@ Ext.onReady(function () {
 
 
     const getDragTarget = function(index) {
+        return dragTargets[0];
         if (!dragTargets[index]) {
 
             let newTarget = document.createElement('div');
@@ -1517,7 +1675,8 @@ Ext.onReady(function () {
         return dragTargets[index];
     };
 
-    const ddColors = ['#00b4d8','#00b4d8','#00b4d8','#00b4d8','#00b4d8', '#00b4d8']/*['#48cae4','#00b4d8','#0096c7','#0077b6','#0096c7', '#00b4d8']*/;
+    const ddColors = ['transparent','#transparent','transparent','transparent','transparent', 'transparent'];
+    // const ddColors = ['#03a9f4','#03a9f4','#03a9f4','#03a9f4','#03a9f4', '#03a9f4'];
 
     const getDDTargetColor = function(index) {
 
@@ -1569,7 +1728,12 @@ Ext.onReady(function () {
     window.memoObjs = {sqrtMemo, sqrMemo};
 
 
-    let targetZoneColor = '#6ED3FF';
+    let targetZoneColorBlue = '#0ba5e31f';
+    let targetZoneColorGreen = '#09BC8A1f';
+    let underlayColorBlue = '#0ba5e3';
+    let underlayColorGreen = '#09BC8A';
+
+
 
 
     // Start dd target setup
@@ -1578,11 +1742,12 @@ Ext.onReady(function () {
 
     //startDDTarget.addEventListener('dragover', ddTargetOnDragOver);
     startDDTarget.addEventListener('dragenter', function(e) {
-        this.style.background = ddColors[0];
-        this.style.innerHTML = '';
+        this.style.background = underlayColorBlue;
+        //this.style.color = targetZoneColor;
     });
     startDDTarget.addEventListener('dragleave', function(e) {
         this.style.background = '#ffffffff';
+        //this.style.color = 'black';
     });
     startDDTarget.addEventListener('drop', ddTargetOnDrop);
     startDDTarget.addEventListener('dragover', ddTargetOnDragOver);
