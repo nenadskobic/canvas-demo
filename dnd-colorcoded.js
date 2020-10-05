@@ -839,18 +839,9 @@ Ext.onReady(function () {
             return;
         }
 
-        /* TODO figure out this part
-        if (!e.altKey && prohibitedTargets.includes(e.target)
-        ) {
-            ddTarget.style.top = 0; ddTarget.style.left = 0; ddTarget.style.width = 0; ddTarget.style.height = 0;
-            delete dragDataList.target;
-            return;
-        }*/
-
         const rect = target.getBoundingClientRect();
         const childGapXs = [], childGapYs = [];
 
-        // TODO do not search for nearest points if user is dragging over one of legit dd targets
 
         let overDirection = 'top';// can be either 'top', 'bottom', 'left' or 'right'
         let closestFrame;
@@ -886,6 +877,13 @@ Ext.onReady(function () {
         }
 
         if (!closestFrame) {
+            for (let i = 0; i < dragTargets.length; i++) {
+                dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
+            }
+            return;
+        }
+
+        if (!e.altKey && prohibitedTargets.includes(closestFrame)) {
             for (let i = 0; i < dragTargets.length; i++) {
                 dragTargets[i].style.top = 0; dragTargets[i].style.left = 0; dragTargets[i].style.width = 0; dragTargets[i].style.height = 0;
             }
