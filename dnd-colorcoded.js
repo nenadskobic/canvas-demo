@@ -1737,9 +1737,9 @@ Ext.onReady(function () {
 
 
     let targetZoneColorBlue = '#0ba5e31f';
-    let targetZoneColorGreen = '#09BC8A1f';
+    let targetZoneColorGreen = '#12e39819';
     let underlayColorBlue = '#0ba5e3';
-    let underlayColorGreen = '#09BC8A';
+    let underlayColorGreen = '#12e398';
 
 
 
