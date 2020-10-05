@@ -1,0 +1,83 @@
+* {
+    box-sizing: border-box;
+}
+
+.frame-selected {
+    outline: 1px solid rgb(56, 147, 212);
+    border: 1px solid rgb(56, 147, 212) !important;
+}
+
+.canvas-parent {
+    /*border: 2px solid #232596;*/
+    padding: 10px 20px 20px 20px;
+}
+
+.dd-target, .dd-target-zone, .dd-target-underlay {
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+}
+
+.dd-target-underlay {
+    background: #03a9f4;
+}
+
+.dd-target-zone {
+    background: #03a9f41f;
+    /*outline: 2px solid #0077b6;*/
+}
+
+.row-group {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.col-group {
+    display: flex;
+    flex-flow: column;
+}
+
+.col-group, .row-group {
+    flex-shrink: 1;
+    flex-grow: 1;
+    /*padding: 12px;*/
+    /*border: 1px dashed black;*/
+    gap: 12px;
+}
+
+.col-group:hover {
+    /*background: #b1b1b1;*/
+}
+
+.row-group:hover {
+    /*background: #5c8ab1;*/
+}
+
+.frame {
+    cursor: pointer;
+    flex-shrink: 1;
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #8d8d8d;
+
+    min-width: 72px;
+    min-height: 72px;
+}
+
+.frame > div:hover {
+    /*background: #47b171;*/
+}
+
+
+.frame > div {
+    /*border: 1px dotted black;*/
+
+    /* Prevent text selection on all supported browsers*/
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+}
