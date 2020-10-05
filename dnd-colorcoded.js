@@ -438,9 +438,14 @@ Ext.onReady(function () {
             if (dragData.target.el.classList.contains('frame') && allAvailableFrames.length > 1) {
                 ddZone.style.background = targetZoneColorGreen;
                 ddTargetUnderlay.style.background = underlayColorGreen;
+                e.dataTransfer.dropEffect = "move";
+                //btnContainer.set({style: {cursor: 'copy'}});
+
             } else {
                 ddZone.style.background = targetZoneColorBlue;
                 ddTargetUnderlay.style.background = underlayColorBlue;
+                e.dataTransfer.dropEffect = "copy";
+                //document.body.style.cursor = 'auto';
             }
 
         }
@@ -626,6 +631,7 @@ Ext.onReady(function () {
     let allAvailableFrames = [];
 
     function frameOnDragStart(e) {
+        e.dataTransfer.effectAllowed = "all";
 
 
         allAvailableFrames = canvasParent.querySelectorAll('.frame');
@@ -1403,6 +1409,8 @@ Ext.onReady(function () {
             type: 'Button',
             selectionSize: 1
         };
+        e.dataTransfer.effectAllowed = "all";
+
 
         /*if (allAvailableFrames.length === 0) {
             startDDTarget.style.background = ddColors[1];
