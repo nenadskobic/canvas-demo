@@ -4,11 +4,10 @@
     <meta content="utf-8" http-equiv="encoding">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/theme-crisp/resources/theme-crisp-all.css" />
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/ext-all.js"> </script>
+          href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/theme-crisp/resources/theme-crisp-all.css"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/ext-all.js"></script>
     <link rel="stylesheet" media="screen" href="dnd-colorcoded.css">
-    <script type="application/javascript" src="dnd-colorcoded.js"></script>
-    </head>
+</head>
 <body>
 
 
@@ -17,103 +16,146 @@
 </div>
 <hr/>
 
-<!-- Canvas parent -->
-<div style ="padding: 10px 15px 0px 15px;">
-    <div class="start-dd-target" style="width:100%;height:2em; box-sizing: border-box; border: 0.1em dashed black; padding: 3px"><b style="pointer-events: none;">Drop report here to start...</b></div>
+<!-- All canvas related elements -->
+<div style="padding: 10px 15px 0px 15px;">
+
+
+    <div class="start-dd-target" style="width:100%;height:2em; box-sizing: border-box; border: 0.1em dashed black; padding: 3px"><b
+                style="pointer-events: none;">Drop report here to start...</b>
+    </div>
+
+    <div id="canvas"></div>
+
 </div>
 
-<div class="canvas-parent">
 
 
-<!-- Flexbox groups-->
 
-<!--    <div class="col-group">-->
-<!--        <div class="row-group">-->
-<!--            <div class="row-group">-->
-<!--                <div class="frame" draggable="true">-->
-<!--                    <div class="frame-content">Frame 1</div>-->
-<!--                </div>-->
-<!--                <div class="frame" draggable="true">-->
-<!--                    <div class="frame-content">Frame 2</div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="row-group">-->
-<!--                <div class="frame" draggable="true">-->
-<!--                    <div class="frame-content">Frame 3</div>-->
-<!--                </div>-->
-<!--                <div class="frame" draggable="true">-->
-<!--                    <div class="frame-content">Frame 4</div>-->
-<!--                </div>-->
-<!--                <div class="frame" draggable="true">-->
-<!--                    <div class="frame-content">Frame 5</div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row-group">-->
-<!--            <div class="col-group">-->
-<!--                <div class="frame" draggable="true">-->
-<!--                    <div class="frame-content">Frame 6</div>-->
-<!--                </div>-->
-<!--                <div class="row-group">-->
-<!--                    <div class="frame" draggable="true">-->
-<!--                        <div class="frame-content">Frame 7</div>-->
-<!--                    </div>-->
-<!--                    <div class="frame" draggable="true">-->
-<!--                        <div class="frame-content">Frame 8</div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="frame" draggable="true">-->
-<!--                <div class="frame-content">Frame 9</div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="frame" draggable="true">-->
-<!--            <div class="frame-content">Frame 10</div>-->
-<!--        </div>-->
-<!--    </div>-->
-</div>
-<!-- End of canvas parent-->
 
-<!--Use this color as dd-target-zone base color: #00b4d822-->
+
+
 <div class="dd-target-zone"></div>
-
 <div class="dd-target-parent">
     <div class="dd-target-underlay"></div>
     <div class="dd-target"></div>
 </div>
 
 
+<script type="text/javascript">
+/*
+    const conf = {
+        type: 'column',
+        wrap: true,
+        justify: 'start',
+        align: 'start',
+        vgap: 20,
+        hgap: 20,
+        grow: true,
+        shrink: true,
+        cells: [
+            {
+                type: 'row',
+                // grow: false,
+                // shrink: false,
+                cells: [
+                    {
+                        type: 'cell',
+                        id: 'fgrp1-h2-n3',
+                        width: 700,
+                        height: 300,
+                        grow: true,
+                        shrink: true,
+                        fgcolor: 'black',
+                        bgcolor: 'white',
+                        border: '1px solid'
+                    },
+                    {
+                        type: 'column',
+                        // grow: false,
+                        // shrink: false,
+                        cells: [
+                            {
+                                type: 'cell',
+                                // id: 'fgrp1-h2-n4',
+                                width: 700,
+                                height: 100,
+                                grow: true,
+                                shrink: true,
+                                fgcolor: 'white',
+                                bgcolor: 'pink'
+                            },
+                            {
+                                type: 'row',
+                                hgap: 5,
+                                grow: true,
+                                shrink: true,
+                                cells: [
+                                    {
+                                        type: 'cell',
+                                        // id: 'fgrp1-h2-n5',
+                                        width: 345,
+                                        height: 200,
+                                        fgcolor: 'black',
+                                        bgcolor: 'yellow'
+                                    },
+                                    {
+                                        type: 'cell',
+                                        // id: 'fgrp1-h2-n6',
+                                        width: 245,
+                                        height: 100,
+                                        fgcolor: 'black',
+                                        bgcolor: ''
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                type: 'row',
+                wrap: true,
+                inherit: true,
+                cells: [
+                    {
+                        type: 'cell',
+                        // id: 'fgrp1-h2-n7',
+                        width: 500,
+                        height: 500,
+                        grow: true,
+                        fgcolor: 'black',
+                        bgcolor: 'yellow',
+                        border: '1px dashed'
+                    },
+                    {
+                        type: 'cell',
+                        // id: 'fgrp1-h2-n8',
+                        width: 500,
+                        height: 300,
+                        grow: false,
+                        fgcolor: 'white',
+                        bgcolor: 'blue'
+                    }
+                ]
+            }
+        ]
+    };
 
+    const cb = (el) => {
+        console.log(el);
+        console.log(el.id);
+    };
 
+    console.log(Ext.clone(conf));
 
+    gencanvas('canvas', conf, cb);
+    //console.log('Reapplying...');
+    //gencanvas('canvas', conf, cb);
 
-
-<!--<div draggable="true">-->
-<!--    <div style="position:absolute;top:114px;left:16px;height:396px;width:1505px;background:#0077b622"></div>-->
-<!--    <div style="position:absolute;top:114px;left:16px;height:12px;width:1505px;background:#0077b6bb"></div>-->
-<!--</div>-->
-<!--<div draggable="true">-->
-<!--    <div style="position:absolute;top:114px;left:16px;height:98px;width:702px;background:#0096c722"></div>-->
-<!--    <div style="position:absolute;top:126px;left:16px;height:12px;width:702px;background:#0096c7bb"></div>-->
-<!--</div>-->
-<!--<div draggable="true">-->
-<!--    <div style="position:absolute;top:126px;left:16px;height:96px;width:348px;background:#00b4d822"></div>-->
-<!--    <div style="position:absolute;top:138px;left:16px;height:12px;width:348px;background:#00b4d8bb"></div>-->
-<!--</div>-->
-<!--<div draggable="true">-->
-<!--    <div style="position:absolute;top:590px;left:830px;height:96px;width:348px;background:#48cae422"></div>-->
-<!--    <div style="position:absolute;top:590px;left:830px;height:12px;width:348px;background:#48cae4bb"></div>-->
-<!--</div>-->
-<!--<div draggable="true">-->
-<!--    <div style="position:absolute;top:590px;left:1040px;height:96px;width:348px;background:#00b4d822"></div>-->
-<!--    <div style="position:absolute;top:590px;left:1040px;height:12px;width:348px;background:#00b4d8bb"></div>-->
-<!--</div>-->
-<!--<div draggable="true">-->
-<!--    <div style="position:absolute;top:590px;left:1250px;height:96px;width:348px;background:#0096c722"></div>-->
-<!--    <div style="position:absolute;top:590px;left:1250px;height:12px;width:348px;background:#0096c7bb"></div>-->
-<!--</div>-->
-
-
+    console.log(conf);*/
+</script>
+<script type="text/javascript" src="canvas.js"></script>
+<script type="application/javascript" src="dnd-colorcoded.js"></script>
 
 
 </body>
