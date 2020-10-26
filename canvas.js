@@ -1,15 +1,10 @@
 const CANVAS_ROOT_ID = 'canvas';
 const CELLS_ID_PREFIX = 'fgrp';
 
-const ROWS_SELECTOR = CANVAS_ROOT_ID.concat('-r');
-const COLS_SELECTOR = CANVAS_ROOT_ID.concat('-c');
 const CELLS_SELECTOR = CANVAS_ROOT_ID.concat('-').concat(CELLS_ID_PREFIX);
-const ALL_CONFIGURABLE_CANVAS_ITEMS = 'div[id^='.concat(ROWS_SELECTOR).concat('], div[id^='
-    .concat(COLS_SELECTOR).concat('], div[id^=').concat(ROWS_SELECTOR).concat('] > div[id^=').concat(CELLS_SELECTOR).concat('], div[id^=')
-    .concat(COLS_SELECTOR).concat('] > div[id^=').concat(CELLS_SELECTOR).concat(']'));
+
 
 let currentCells = [];
-let allConfigurableCanvasItems = [];
 const canvasRootNode = document.getElementById(CANVAS_ROOT_ID);
 const tempRoot = document.createElement('div');
 
