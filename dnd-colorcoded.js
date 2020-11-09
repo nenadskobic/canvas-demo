@@ -162,17 +162,12 @@ Ext.onReady(function () {
             }
         ]
     };
+
 /*
     setTimeout(function() {
-        conf.cells = [
-            {
-                type: 'cell',
-                height: 120,
-                id: 'fgrp-h2-n2',
-                border: '1px solid red'
-            }
-        ];
-        gencanvas('canvas', conf, cb);
+        conf.cells.splice(0,1);
+        console.log('conf without second items',conf);
+        gencanvas(CANVAS_ROOT_ID, conf, onCreateCellCb);
         console.log(conf);
     }, 1800);*/
 
@@ -204,6 +199,12 @@ Ext.onReady(function () {
             el.style.cursor = 'pointer';
         }
 
+    };
+
+    const configUpdated = () => {
+        processNewConfig(CANVAS_ROOT_ID, conf, onCreateCellCb);
+        canvasParent = document.getElementById(CANVAS_ROOT_ID);
+        canvasParent.addEventListener('dragover', canvasOnDragOver);
     };
 
     const setCellListeners = (node) => {
@@ -325,7 +326,7 @@ Ext.onReady(function () {
                     insertToConfig(parentConfSlice, beforeChildWithID, newCellChild);
                 }
             }
-            processNewConfig(CANVAS_ROOT_ID, conf, onCreateCellCb);
+            configUpdated();
 
         } else if (dragType === 'InBetween') {
 
@@ -363,7 +364,7 @@ Ext.onReady(function () {
                     insertToConfig(parentConfSlice, beforeChildWithID, newCellChild);
                 }
             }
-            processNewConfig(CANVAS_ROOT_ID, conf, onCreateCellCb);
+            configUpdated();
 
         } else if (dragType === 'NewDirection') {
 
@@ -418,7 +419,7 @@ Ext.onReady(function () {
                     parentConfSlice.cells.push(newCellChild);
                 }
             }
-            processNewConfig(CANVAS_ROOT_ID, conf, onCreateCellCb);
+            configUpdated();
 
 
         } else if (dragType === 'SplitCell') {
@@ -475,7 +476,7 @@ Ext.onReady(function () {
                         newGroup.cells.push(newCellChild);
                     }
                 }
-                processNewConfig(CANVAS_ROOT_ID, conf, onCreateCellCb);
+                configUpdated();
 
             } else {
 
@@ -529,7 +530,7 @@ Ext.onReady(function () {
                         newGroup.cells.push(newCellChild);
                     }
                 }
-                processNewConfig(CANVAS_ROOT_ID, conf, onCreateCellCb);
+                configUpdated();
             }
         }
     };
@@ -1492,7 +1493,7 @@ Ext.onReady(function () {
             for (let i = 0; i < selectedCells.length; i++) {
                 const confId = domIdToConfId(selectedCells[i].id);
                 removeConfSliceFromParent(conf, confId);
-                processNewConfig(CANVAS_ROOT_ID, conf, onCreateCellCb);
+                configUpdated();
             }
 
 

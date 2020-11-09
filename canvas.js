@@ -5,7 +5,7 @@ const CELLS_SELECTOR = CANVAS_ROOT_ID.concat('-').concat(CELLS_ID_PREFIX);
 
 
 let currentCells = [];
-const canvasRootNode = document.getElementById(CANVAS_ROOT_ID);
+let canvasRootNode = document.getElementById(CANVAS_ROOT_ID);
 const tempRoot = document.createElement('div');
 
 const processNewConfig = (oc, conf, cb, parent_conf) =>
@@ -16,22 +16,22 @@ const processNewConfig = (oc, conf, cb, parent_conf) =>
 
 
     if (currentCells.length > 1) {
-        removeReduntantItemGroups(conf); // groups that have only single cell or dont have any cells at all (objPart.cells is empty)
+        removeReduntantItemGroups(conf); // remove groups that have only single cell or dont have any cells at all (objPart.cells is empty)
     }
-
+    /*
     markPlaceholders(conf);
 
     // Attach everything to tempRoot
     while (canvasRootNode.firstChild) { tempRoot.appendChild(canvasRootNode.firstChild); }
-
+    */
     gencanvas(oc, conf, cb, parent_conf);
-
+    canvasRootNode = document.getElementById(CANVAS_ROOT_ID);
+    /*
     replacePlaceholdersWithRealCells(conf);
     // Remove everything from tempRoot
     while (tempRoot.firstChild) { tempRoot.removeChild(tempRoot.firstChild); }
-
+     */
     console.log('conf at the end of processNewConfig call =>', conf);
-
 
 };
 
@@ -94,6 +94,7 @@ const callGencanvasWithCloneAndMoveActions = (oc, conf, cb, parent_conf) => {
 };
 
 const countAllCells = () => {
+
     return canvasRootNode.querySelectorAll('div[id^='.concat(CELLS_SELECTOR).concat(']')).length;
 };
 
@@ -475,11 +476,23 @@ const removeReduntantItemGroups = (conf) =>
 
 
 
-const gencanvas = (oc, conf, cb, parent_conf) =>
+const gencanvas = (oc, conf, cb) =>
 {
     if (typeof oc == 'string')
         oc = document.getElementById(oc);
 
+    if (!oc)
+        return;
+
+    new_oc = oc.cloneNode(false);
+
+    gencontainer(new_oc, conf, cb);
+
+    oc.parentNode.replaceChild(new_oc, oc);
+};
+
+const gencontainer = (oc, conf, cb, parent_conf) =>
+{
     conf.id = parent_conf ? oc.id.substr(oc.id.lastIndexOf('-') + 1) : '';
 
     // oc.style.display = parent_conf ? 'flex' : 'inline-flex';
@@ -555,82 +568,38 @@ const gencanvas = (oc, conf, cb, parent_conf) =>
     {
         const ic_id = id_pfx.concat(i);
 
-        let ic = oc.querySelector('#'.concat(ic_id));
+        let ic = document.createElement('div');
 
-        if (!ic)
-        {
-            ic = document.createElement('div');
-            ic.id = ic_id;
-
-            oc.appendChild(ic);
-
-            if (cb)
-                cb(ic);
-        }
-
-        if (conf.cells[i].type == 'cellplaceholder')
-            genplaceholder(ic, conf.cells[i], cb, conf);
-        else if (conf.cells[i].type == 'cell')
-            gentext(ic, conf.cells[i], cb, conf);
-        else
-            gencanvas(ic, conf.cells[i], cb, conf);
-    }
-};
-
-const genplaceholder = (oc, conf, cb, parent_conf) =>
-{
-    if (typeof oc == 'string')
-        oc = document.getElementById(oc);
-
-    const ic_id = oc.id.substr(0, oc.id.lastIndexOf('-') + 1).concat(conf.id);
-
-    let ic = oc.querySelector('#'.concat(ic_id));
-
-    if (!ic)
-    {
-        ic = document.createElement('div');
         ic.id = ic_id;
+
+        if (cb)
+            cb(ic);
 
         oc.appendChild(ic);
 
+        if (conf.cells[i].type == 'cell')
+            gentext(ic, conf.cells[i], cb, conf);
+        else
+            gencontainer(ic, conf.cells[i], cb, conf);
     }
-
-
-    // grow
-    if (!('grow' in conf) && conf.inherit !== false)
-        conf.grow = parent_conf.grow;
-
-    if (conf.grow)
-        oc.style.flexGrow = 1;
-
-    // shrink
-    if (!('shrink' in conf) && conf.inherit !== false)
-        conf.shrink = parent_conf.shrink;
-
-    if (conf.shrink)
-        oc.style.flexShrink = 1;
-
 };
 
 const gentext = (oc, conf, cb, parent_conf) =>
 {
-    if (typeof oc == 'string')
-        oc = document.getElementById(oc);
-
     const ic_id = oc.id.substr(0, oc.id.lastIndexOf('-') + 1).concat(conf.id);
 
-    let ic = oc.querySelector('#'.concat(ic_id));
+    let ic = document.getElementById(ic_id);
 
     if (!ic)
     {
         ic = document.createElement('div');
         ic.id = ic_id;
 
-        oc.appendChild(ic);
-
         if (cb)
             cb(ic);
     }
+
+    oc.appendChild(ic);
 
     if (conf.fgcolor)
         ic.style.color = conf.fgcolor;
@@ -647,24 +616,30 @@ const gentext = (oc, conf, cb, parent_conf) =>
 
     ic.style.width = ''.concat(conf.width, 'px');
 
-    let i = 0;
-
-    do
+    setTimeout((ic, conf) =>
     {
-        const txt = ic.innerText;
+        let i = 0;
 
-        ic.innerText += ' '.concat(_text[i++]);
+        console.log(ic.scrollHeight, conf.height);
 
-        if (ic.scrollHeight >= conf.height)
+        do
         {
-            ic.innerText = txt;
+            const txt = ic.innerText;
 
-            break;
+            ic.innerText += ' '.concat(_text[i++]);
+
+            if (ic.scrollHeight >= conf.height)
+            {
+                ic.innerText = txt;
+
+                break;
+            }
         }
-    }
-    while (true);
+        while (true);
 
-    ic.style.height = ''.concat(conf.height, 'px');
+        ic.style.height = ''.concat(conf.height, 'px');
+
+    }, 0, ic, conf);
 
     // grow
     if (!('grow' in conf) && conf.inherit !== false)
