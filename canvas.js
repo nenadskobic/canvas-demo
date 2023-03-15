@@ -3,35 +3,21 @@ const CELLS_ID_PREFIX = 'fgrp';
 
 const CELLS_SELECTOR = CANVAS_ROOT_ID.concat('-').concat(CELLS_ID_PREFIX);
 
-
 let currentCells = [];
 let canvasRootNode = document.getElementById(CANVAS_ROOT_ID);
 const tempRoot = document.createElement('div');
 
 const processNewConfig = (oc, conf, cb, parent_conf) =>
 {
-
     currentCells = [];
-    populateAllCellsList(conf, currentCells);
+    populateAllCellsList(conf, currentCells)
 
 
     if (currentCells.length > 1) {
-        removeReduntantItemGroups(conf); // remove groups that have only single cell or dont have any cells at all (objPart.cells is empty)
+        removeReduntantItemGroups(conf) // remove groups that have only single cell or dont have any cells at all (objPart.cells is empty)
     }
-    /*
-    markPlaceholders(conf);
-
-    // Attach everything to tempRoot
-    while (canvasRootNode.firstChild) { tempRoot.appendChild(canvasRootNode.firstChild); }
-    */
-    gencanvas(oc, conf, cb, parent_conf);
-    canvasRootNode = document.getElementById(CANVAS_ROOT_ID);
-    /*
-    replacePlaceholdersWithRealCells(conf);
-    // Remove everything from tempRoot
-    while (tempRoot.firstChild) { tempRoot.removeChild(tempRoot.firstChild); }
-     */
-    console.log('conf at the end of processNewConfig call =>', conf);
+    gencanvas(oc, conf, cb, parent_conf)
+    canvasRootNode = document.getElementById(CANVAS_ROOT_ID)
 
 };
 
@@ -183,38 +169,7 @@ const removeConfSliceFromParent = (confSlice, idOfConfSliceThatShouldBeRemoved) 
                 if (confSlice.cells[i].id === idOfConfSliceThatShouldBeRemoved) {
                     confSlice.cells.splice(i, 1);
                     return i;
-                    // TODO testing
-
-                   /* const domId = confIdToDomId(idOfConfSliceThatShouldBeRemoved);
-                    const targetCell = canvasRootNode.querySelector('#'.concat(domId));
-
-                    if(!targetCell) {
-                        confSlice.cells.splice(i, 1);
-                        return i;
-                    }
-
-                    if(confSlice.cells[i].type === 'cell') {
-
-                        let firstCellParent = targetCell.parentNode;
-                        const firstFirstCellParent = firstCellParent;
-                        firstCellParent._oldid = firstCellParent.id;
-                        firstCellParent.id = firstCellParent.parentNode.lastElementChild.id;
-
-                        while (firstCellParent.nextElementSibling) {
-                            firstCellParent = firstCellParent.nextElementSibling;
-                            firstCellParent._oldid = firstCellParent.id;
-                            firstCellParent.id = firstCellParent.previousElementSibling._oldid;
-                        }
-                        // First first cell parent should become last item inside its parent
-                        const targetParent = firstFirstCellParent.parentNode;
-                        targetParent.removeChild(firstFirstCellParent);
-                        targetParent.appendChild(firstFirstCellParent);
-                    }
-
-                    confSlice.cells.splice(i, 1);
-                    return i;*/
-                }
-                removeConfSliceFromParent(confSlice.cells[i], idOfConfSliceThatShouldBeRemoved);
+                    removeConfSliceFromParent(confSlice.cells[i], idOfConfSliceThatShouldBeRemoved);
             }
         }
     } else {
@@ -279,13 +234,6 @@ const insertToConfig = (confSlice, beforeChildWithID, newCellChild) => {
     if (beforeChildWithID) {
         const childIndex = getCellIndexInParent(confSlice.cells, beforeChildWithID);
         confSlice.cells.splice(childIndex, 0, newCellChild);
-
-        // Mark all cells after newly inserted one for moving
-        /*for (let i = childIndex + 1; i < confSlice.cells.length; i++) {
-            markAllCellsThatShouldBeMoved(confSlice.cells[i]);
-        }*/
-
-
     } else {
         confSlice.cells.push(newCellChild);
     }
@@ -341,14 +289,6 @@ const removeAllItemsOutsideOfConfig = (conf, canvasItemsList) => {
     const allConfIds = [];
     populateAllConfIds(allConfIds, conf);
 
-    console.log('------------------------------------------');
-    console.log('--- REMOVE ALL ITEMS OUTSIDE OF CONFIG ---');
-    console.log('------------------------------------------');
-    console.log(conf);
-    console.log(allConfIds);
-    console.log(canvasItemsList);
-
-
     for (let i = 0; i < canvasItemsList.length; i++) {
 
         if (!allConfIds.includes(canvasItemsList[i].id)) {
@@ -357,9 +297,6 @@ const removeAllItemsOutsideOfConfig = (conf, canvasItemsList) => {
             let isFirstCellParent = canvasItemFirstChild && canvasItemFirstChild.id && canvasItemFirstChild.id.startsWith(CELLS_SELECTOR);
 
             const itemIsCell = canvasItemsList[i].id.startsWith(CELLS_SELECTOR);
-
-            console.log('{ itemIsFirstCellParent, itemIsCell }', isFirstCellParent, itemIsCell);
-
 
             if (itemIsCell) {// remove that cell and its first parent
                 canvasItemsList[i].parentNode.parentNode.removeChild(canvasItemsList[i].parentNode);
@@ -450,7 +387,6 @@ const traverseAndRemoveUnneccessaryGroups = (confSlice, parentCellArray, cellInd
         } else if (confSlice.type !== 'cell' && confSlice.cells && confSlice.cells.length === 1 && confSlice.cells[0].type === 'cell') {
             // Move this item one position up and mark cell that should be moved to new parent
             parentCellArray.splice(cellIndex, 1, confSlice.cells[0]);
-            //markAllCellsThatShouldBeMoved(confSlice.cells[0]);
             traverseAndRemoveUnneccessaryGroups(parentConfSlice, parentConfSlice.parentNode?.cells, 0, parentConfSlice.parentNode);
         } else if (confSlice.cells) {
             for (let i = confSlice.cells.length - 1; i >= 0; i--) {
@@ -494,8 +430,6 @@ const gencanvas = (oc, conf, cb) =>
 const gencontainer = (oc, conf, cb, parent_conf) =>
 {
     conf.id = parent_conf ? oc.id.substr(oc.id.lastIndexOf('-') + 1) : '';
-
-    // oc.style.display = parent_conf ? 'flex' : 'inline-flex';
     oc.style.display = 'flex';
 
     if (conf.type != 'row' && conf.type != 'column')
@@ -654,19 +588,6 @@ const gentext = (oc, conf, cb, parent_conf) =>
 
     if (conf.shrink)
         oc.style.flexShrink = 1;
-
-    // scale
-    let scale = parseFloat(oc.clientWidth) / parseFloat(ic.offsetWidth);
-
-    //console.log(scale, oc.clientWidth, ic.offsetWidth);
-
-    if (scale != 1.0)
-    {
-        //ic.style.transformOrigin = 'top left';
-        //ic.style.transform = 'scale('.concat(scale, ')');
-    }
-
-    //oc.style.height = ''.concat(parseFloat(ic.offsetHeight) * scale, 'px');
 };
 
 const _text = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dictumst vestibulum rhoncus est pellentesque. Eget gravida cum sociis natoque. Ultricies lacus sed turpis tincidunt id aliquet. Rutrum quisque non tellus orci ac auctor augue. Tortor posuere ac ut consequat. Eget nulla facilisi etiam dignissim diam quis enim lobortis scelerisque. Ut pharetra sit amet aliquam id diam maecenas. Quis commodo odio aenean sed. Lobortis scelerisque fermentum dui faucibus in. Nec tincidunt praesent semper feugiat nibh sed pulvinar proin gravida. Odio morbi quis commodo odio aenean sed adipiscing. Tellus rutrum tellus pellentesque eu tincidunt tortor aliquam nulla.
